@@ -35,6 +35,16 @@ public final class TestModels {
     public String name;
   }
 
+  public static class ClassWithoutDefaultConstructor {
+    public ClassWithoutDefaultConstructor(Object unused) {
+    }
+  }
+
+  public static class ClassWithoutPublicDefaultConstructor {
+    private ClassWithoutPublicDefaultConstructor() {
+    }
+  }
+
   public static abstract class TestModel implements ContentResolverModel, MicroOrmModel {
   }
 
@@ -60,6 +70,8 @@ public final class TestModels {
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
       .with(ROOM)
+      .with(new BaseTestModel(ClassWithoutDefaultConstructor.class))
+      .with(new BaseTestModel(ClassWithoutPublicDefaultConstructor.class))
       .build();
 
   private static Uri buildUriFor(Class<?> klass) {
