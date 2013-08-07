@@ -79,7 +79,7 @@ public class EchoContentResolver {
           public Object apply(String key) {
             return values.get(key);
           }
-        }));
+        }).toArray());
 
         return cursor;
       }
