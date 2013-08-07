@@ -24,6 +24,8 @@ import com.chalup.thneed.ModelGraph;
 import android.content.ContentResolver;
 import android.net.Uri;
 
+import java.util.UUID;
+
 public final class TestModels {
   private TestModels() {
   }
@@ -43,6 +45,11 @@ public final class TestModels {
   public static class ClassWithoutPublicDefaultConstructor {
     private ClassWithoutPublicDefaultConstructor() {
     }
+  }
+
+  public static class ClassWithNonBasicFieldType {
+    @Column("uuid")
+    public UUID uuid;
   }
 
   public static abstract class TestModel implements ContentResolverModel, MicroOrmModel {
@@ -72,6 +79,7 @@ public final class TestModels {
       .with(ROOM)
       .with(new BaseTestModel(ClassWithoutDefaultConstructor.class))
       .with(new BaseTestModel(ClassWithoutPublicDefaultConstructor.class))
+      .with(new BaseTestModel(ClassWithNonBasicFieldType.class))
       .build();
 
   private static Uri buildUriFor(Class<?> klass) {

@@ -69,5 +69,10 @@ public class BasicFakingTest {
     assertThat(room.id).isNotEqualTo(0);
     assertThat(room.name).isNotNull();
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldNotAllowCreatingClassWithNonBasicMemberTypes() throws Exception {
+    mTestSubject.iNeed(TestModels.ClassWithNonBasicFieldType.class).in(mContentResolver);
+  }
 }
 
