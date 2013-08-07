@@ -71,6 +71,12 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       Preconditions.checkNotNull(mModel, "Faker cannot create an object of " + klass.getSimpleName() + " from the provided ModelGraph");
     }
 
+    public ModelBuilder<T> relatedTo(Object parentObject) {
+      // TODO: check if the supplied object creates a relation
+
+      return this;
+    }
+
     public T in(ContentResolver resolver) {
       Uri uri = resolver.insert(mModel.getUri(), getContentValues());
 

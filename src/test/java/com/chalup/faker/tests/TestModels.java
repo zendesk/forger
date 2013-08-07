@@ -37,6 +37,14 @@ public final class TestModels {
     public String name;
   }
 
+  public static class Table {
+    @Column("id")
+    public long id;
+
+    @Column("room_id")
+    public long roomId;
+  }
+
   public static class ClassWithoutDefaultConstructor {
     public ClassWithoutDefaultConstructor(Object unused) {
     }
@@ -74,12 +82,14 @@ public final class TestModels {
   }
 
   private static TestModel ROOM = new BaseTestModel(Room.class);
+  private static TestModel TABLE = new BaseTestModel(Table.class);
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
-      .with(ROOM)
       .with(new BaseTestModel(ClassWithoutDefaultConstructor.class))
       .with(new BaseTestModel(ClassWithoutPublicDefaultConstructor.class))
       .with(new BaseTestModel(ClassWithNonBasicFieldType.class))
+      .where()
+      .the(TABLE).references(ROOM).by("room_id")
       .build();
 
   private static Uri buildUriFor(Class<?> klass) {

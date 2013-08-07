@@ -70,6 +70,17 @@ public class BasicFakingTest {
     assertThat(room.name).isNotNull();
   }
 
+  @Test
+  public void shouldAllowSupplyingParentObjectForOneToManyRelationship() throws Exception {
+    TestModels.Room room = mTestSubject.iNeed(TestModels.Room.class).in(mContentResolver);
+    assertThat(room).isNotNull();
+
+    TestModels.Table table = mTestSubject.iNeed(TestModels.Table.class).relatedTo(room).in(mContentResolver);
+    assertThat(table).isNotNull();
+
+    assertThat(table.roomId).isEqualTo(room.id);
+  }
+
   @Test(expected = IllegalArgumentException.class)
   public void shouldNotAllowCreatingClassWithNonBasicMemberTypes() throws Exception {
     mTestSubject.iNeed(TestModels.ClassWithNonBasicFieldType.class).in(mContentResolver);
