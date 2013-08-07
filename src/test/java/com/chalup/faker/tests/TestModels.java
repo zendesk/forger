@@ -16,9 +16,54 @@
 
 package com.chalup.faker.tests;
 
-public interface TestModels {
+import com.chalup.faker.thneed.ContentResolverModel;
+import com.chalup.faker.thneed.MicroOrmModel;
+import com.chalup.thneed.ModelGraph;
+
+import android.content.ContentResolver;
+import android.net.Uri;
+
+public final class TestModels {
+  private TestModels() {
+  }
+
   public static class Room {
     public long id;
     public String name;
+  }
+
+  public static abstract class TestModel implements ContentResolverModel, MicroOrmModel {
+  }
+
+  public static class BaseTestModel extends TestModel {
+    private final Class<?> mKlass;
+
+    public BaseTestModel(Class<?> klass) {
+      mKlass = klass;
+    }
+
+    @Override
+    public Uri getUri() {
+      return buildUriFor(mKlass);
+    }
+
+    @Override
+    public Class<?> getModelClass() {
+      return mKlass;
+    }
+  }
+
+  private static TestModel ROOM = new BaseTestModel(Room.class);
+
+  static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
+      .with(ROOM)
+      .build();
+
+  private static Uri buildUriFor(Class<?> klass) {
+    return new Uri.Builder()
+        .scheme(ContentResolver.SCHEME_CONTENT)
+        .authority(TestModels.class.getPackage().getName())
+        .appendPath(klass.getSimpleName().toLowerCase())
+        .build();
   }
 }

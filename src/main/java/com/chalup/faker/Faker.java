@@ -16,14 +16,42 @@
 
 package com.chalup.faker;
 
+import com.chalup.faker.thneed.ContentResolverModel;
+import com.chalup.faker.thneed.MicroOrmModel;
+import com.chalup.thneed.ModelGraph;
+import com.chalup.thneed.ModelVisitor;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+
 import android.content.ContentResolver;
 
-public class Faker {
+import java.util.Map;
+
+public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
+
+  private final Map<Class<?>, TModel> mModels = Maps.newHashMap();
+
+  public Faker(ModelGraph<TModel> modelGraph) {
+    modelGraph.accept(new ModelVisitor<TModel>() {
+      @Override
+      public void visit(TModel model) {
+        mModels.put(model.getModelClass(), model);
+      }
+    });
+  }
+
   public <T> ModelBuilder<T> iNeed(Class<T> klass) {
-    return new ModelBuilder<T>();
+    return new ModelBuilder<T>(klass);
   }
 
   public class ModelBuilder<T> {
+    private final TModel mModel;
+
+    private ModelBuilder(Class<T> klass) {
+      mModel = mModels.get(klass);
+      Preconditions.checkNotNull(mModel, "Faker cannot create an object of " + klass.getSimpleName() + " from the provided ModelGraph");
+    }
+
     public T in(ContentResolver resolver) {
       return null;
     }

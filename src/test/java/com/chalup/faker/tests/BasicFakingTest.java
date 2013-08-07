@@ -32,12 +32,12 @@ import android.content.ContentResolver;
 @Config(manifest = Config.NONE)
 public class BasicFakingTest {
 
-  Faker mTestSubject;
+  Faker<TestModels.TestModel> mTestSubject;
   ContentResolver mContentResolver;
 
   @Before
   public void setUp() throws Exception {
-    mTestSubject = new Faker();
+    mTestSubject = new Faker<TestModels.TestModel>(TestModels.MODEL_GRAPH);
     mContentResolver = EchoContentResolver.get();
   }
 
