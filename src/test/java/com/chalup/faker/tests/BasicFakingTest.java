@@ -41,6 +41,14 @@ public class BasicFakingTest {
     mContentResolver = EchoContentResolver.get();
   }
 
+  public static class ClassOutsideOfTheModelGraph {
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void shouldNotAllowFakingClassesOutsideOfModelGraph() throws Exception {
+    mTestSubject.iNeed(ClassOutsideOfTheModelGraph.class).in(mContentResolver);
+  }
+
   @Test
   public void shouldCreateSimpleObject() throws Exception {
     TestModels.Room room = mTestSubject.iNeed(TestModels.Room.class).in(mContentResolver);
