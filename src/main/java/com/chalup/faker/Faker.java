@@ -23,6 +23,7 @@ import com.chalup.microorm.annotations.Column;
 import com.chalup.thneed.ModelGraph;
 import com.chalup.thneed.ModelVisitor;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import android.content.ContentResolver;
@@ -37,9 +38,16 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
 
   private final Map<Class<?>, TModel> mModels = Maps.newHashMap();
   private final MicroOrm mMicroOrm;
+  private final Map<Class<?>, FakeDataGenerator<?>> mGenerators;
 
   public Faker(ModelGraph<TModel> modelGraph, MicroOrm microOrm) {
+    this(modelGraph, microOrm, getDefaultGenerators());
+  }
+
+  private Faker(ModelGraph<TModel> modelGraph, MicroOrm microOrm, Map<Class<?>, FakeDataGenerator<?>> generators) {
     mMicroOrm = microOrm;
+    mGenerators = generators;
+
     modelGraph.accept(new ModelVisitor<TModel>() {
       @Override
       public void visit(TModel model) {
@@ -108,5 +116,21 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     }
   }
 
-  private Map<Class<?>, FakeDataGenerator<?>> mGenerators;
+  private static final Map<Class<?>, FakeDataGenerator<?>> getDefaultGenerators() {
+      return ImmutableMap.<Class<?>, FakeDataGenerator<?>>builder()
+          .put(String.class, new FakeDataGenerators.StringGenerator())
+          .put(short.class, new FakeDataGenerators.ShortGenerator())
+          .put(int.class, new FakeDataGenerators.IntegerGenerator())
+          .put(long.class, new FakeDataGenerators.LongGenerator())
+          .put(boolean.class, new FakeDataGenerators.BooleanGenerator())
+          .put(float.class, new FakeDataGenerators.FloatGenerator())
+          .put(double.class, new FakeDataGenerators.DoubleGenerator())
+          .put(Short.class, new FakeDataGenerators.ShortGenerator())
+          .put(Integer.class, new FakeDataGenerators.IntegerGenerator())
+          .put(Long.class, new FakeDataGenerators.LongGenerator())
+          .put(Boolean.class, new FakeDataGenerators.BooleanGenerator())
+          .put(Float.class, new FakeDataGenerators.FloatGenerator())
+          .put(Double.class, new FakeDataGenerators.DoubleGenerator())
+          .build();
+  }
 }
