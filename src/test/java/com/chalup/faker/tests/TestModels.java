@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.chalup.faker;
+package com.chalup.faker.tests;
 
-import android.content.ContentResolver;
-
-public class Faker {
-  public <T> ModelBuilder<T> iNeed(Class<T> klass) {
-    return new ModelBuilder<T>();
-  }
-
-  public class ModelBuilder<T> {
-    public T in(ContentResolver resolver) {
-      return null;
-    }
+public interface TestModels {
+  public static class Room {
+    public long id;
+    public String name;
   }
 }
