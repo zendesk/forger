@@ -19,6 +19,7 @@ package com.chalup.faker;
 import com.chalup.faker.thneed.ContentResolverModel;
 import com.chalup.faker.thneed.MicroOrmModel;
 import com.chalup.microorm.MicroOrm;
+import com.chalup.microorm.annotations.Column;
 import com.chalup.thneed.ModelGraph;
 import com.chalup.thneed.ModelVisitor;
 import com.google.common.base.Preconditions;
@@ -29,6 +30,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 
 public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
@@ -75,7 +77,24 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     private ContentValues getContentValues() {
       T fake = instantiateFake();
 
-      // TODO: initialize @Column annotated fields with fake values
+      try {
+        for (Field field : Fields.allFieldsIncludingPrivateAndSuper(mKlass)) {
+          boolean wasAccessible = field.isAccessible();
+          field.setAccessible(true);
+
+          Column columnAnnotation = field.getAnnotation(Column.class);
+          if (columnAnnotation != null) {
+            Class<?> fieldType = field.getType();
+
+            Preconditions.checkArgument(mGenerators.containsKey(fieldType), "Faker doesn't know how to fake the " + fieldType.getName());
+            field.set(fake, mGenerators.get(fieldType).generate());
+          }
+
+          field.setAccessible(wasAccessible);
+        }
+      } catch (IllegalAccessException e) {
+        throw new IllegalArgumentException("Faker cannot initialize fields in " + mKlass.getSimpleName() + ".", e);
+      }
 
       return mMicroOrm.toContentValues(fake);
     }
@@ -88,4 +107,6 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       }
     }
   }
+
+  private Map<Class<?>, FakeDataGenerator<?>> mGenerators;
 }
