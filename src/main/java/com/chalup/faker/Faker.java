@@ -29,8 +29,11 @@ import com.chalup.thneed.PolymorphicRelationship;
 import com.chalup.thneed.RecursiveModelRelationship;
 import com.chalup.thneed.RelationshipVisitor;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -127,8 +130,25 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       Preconditions.checkNotNull(mModel, "Faker cannot create an object of " + klass.getSimpleName() + " from the provided ModelGraph");
     }
 
-    public ModelBuilder<T> relatedTo(Object parentObject) {
-      // TODO: check if the supplied object creates a relation
+    Map<Dependency, Object> mSuppliedDependencies = Maps.newHashMap();
+
+    public ModelBuilder<T> relatedTo(final Object parentObject) {
+      Collection<Dependency> dependencies = Collections2.filter(mDependencies.get(mKlass), new Predicate<Dependency>() {
+        @Override
+        public boolean apply(Dependency dependency) {
+          return dependency.getDependencyClass().equals(parentObject.getClass());
+        }
+      });
+
+      switch (dependencies.size()) {
+      case 0:
+        throw new IllegalArgumentException(mKlass.getName() + " model is not related to " + parentObject.getClass().getName());
+      case 1:
+        mSuppliedDependencies.put(Iterables.get(dependencies, 0), parentObject);
+        break;
+      default:
+        throw new IllegalStateException();
+      }
 
       return this;
     }
