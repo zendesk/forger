@@ -122,12 +122,15 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
   public class ModelBuilder<T> {
     private final TModel mModel;
     private final Class<T> mKlass;
+    private ContentValues mContentValues;
 
     private ModelBuilder(Class<T> klass) {
       mKlass = klass;
 
       mModel = mModels.get(klass);
       Preconditions.checkNotNull(mModel, "Faker cannot create an object of " + klass.getSimpleName() + " from the provided ModelGraph");
+
+      mContentValues = initializeContentValues();
     }
 
     Map<Dependency, Object> mSuppliedDependencies = Maps.newHashMap();
@@ -154,7 +157,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     }
 
     public T in(ContentResolver resolver) {
-      Uri uri = resolver.insert(mModel.getUri(), getContentValues());
+      Uri uri = resolver.insert(mModel.getUri(), mContentValues);
 
       Cursor c = resolver.query(uri, mMicroOrm.getProjection(mKlass), null, null, null);
       if (c != null && c.moveToFirst()) {
@@ -164,7 +167,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       }
     }
 
-    private ContentValues getContentValues() {
+    private ContentValues initializeContentValues() {
       T fake = instantiateFake();
 
       Collection<String> dependenciesColumns = Lists.newArrayList();
