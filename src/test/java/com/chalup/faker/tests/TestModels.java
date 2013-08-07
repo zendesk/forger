@@ -18,6 +18,7 @@ package com.chalup.faker.tests;
 
 import com.chalup.faker.thneed.ContentResolverModel;
 import com.chalup.faker.thneed.MicroOrmModel;
+import com.chalup.microorm.annotations.Column;
 import com.chalup.thneed.ModelGraph;
 
 import android.content.ContentResolver;
@@ -28,7 +29,9 @@ public final class TestModels {
   }
 
   public static class Room {
+    @Column("id")
     public long id;
+    @Column("name")
     public String name;
   }
 

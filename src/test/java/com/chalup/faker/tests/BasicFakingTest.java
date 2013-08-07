@@ -19,6 +19,7 @@ package com.chalup.faker.tests;
 import static org.fest.assertions.Assertions.assertThat;
 
 import com.chalup.faker.Faker;
+import com.chalup.microorm.MicroOrm;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class BasicFakingTest {
 
   @Before
   public void setUp() throws Exception {
-    mTestSubject = new Faker<TestModels.TestModel>(TestModels.MODEL_GRAPH);
+    mTestSubject = new Faker<TestModels.TestModel>(TestModels.MODEL_GRAPH, new MicroOrm());
     mContentResolver = EchoContentResolver.get();
   }
 
