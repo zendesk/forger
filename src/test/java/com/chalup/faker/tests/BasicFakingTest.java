@@ -71,6 +71,14 @@ public class BasicFakingTest {
   }
 
   @Test
+  public void shouldRecursivelySatisfyDependenciesWithNewObjectsInOneToManyRelationship() throws Exception {
+    TestModels.Table table = mTestSubject.iNeed(TestModels.Table.class).in(mContentResolver);
+
+    assertThat(table).isNotNull();
+    assertThat(table.roomId).isNotEqualTo(0);
+  }
+
+  @Test
   public void shouldAllowSupplyingParentObjectForOneToManyRelationship() throws Exception {
     TestModels.Room room = mTestSubject.iNeed(TestModels.Room.class).in(mContentResolver);
     assertThat(room).isNotNull();
@@ -79,6 +87,11 @@ public class BasicFakingTest {
     assertThat(table).isNotNull();
 
     assertThat(table.roomId).isEqualTo(room.id);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectIncorrectParentObject() throws Exception {
+    mTestSubject.iNeed(TestModels.Table.class).relatedTo(new Object());
   }
 
   @Test(expected = IllegalArgumentException.class)
