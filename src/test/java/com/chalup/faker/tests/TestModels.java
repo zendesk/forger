@@ -30,32 +30,32 @@ public final class TestModels {
   private TestModels() {
   }
 
-  public static class Room {
+  public static class Identifiable {
     @Column("id")
     public long id;
+  }
+
+  public static class Room extends Identifiable {
     @Column("name")
     public String name;
   }
 
-  public static class Table {
-    @Column("id")
-    public long id;
-
+  public static class Table extends Identifiable {
     @Column("room_id")
     public long roomId;
   }
 
-  public static class ClassWithoutDefaultConstructor {
+  public static class ClassWithoutDefaultConstructor extends Identifiable {
     public ClassWithoutDefaultConstructor(Object unused) {
     }
   }
 
-  public static class ClassWithoutPublicDefaultConstructor {
+  public static class ClassWithoutPublicDefaultConstructor extends Identifiable {
     private ClassWithoutPublicDefaultConstructor() {
     }
   }
 
-  public static class ClassWithNonBasicFieldType {
+  public static class ClassWithNonBasicFieldType extends Identifiable {
     @Column("uuid")
     public UUID uuid;
   }
@@ -63,10 +63,10 @@ public final class TestModels {
   public static abstract class TestModel implements ContentResolverModel, MicroOrmModel {
   }
 
-  public static class BaseTestModel extends TestModel {
-    private final Class<?> mKlass;
+  public static class BaseTestModel<T> extends TestModel {
+    private final Class<T> mKlass;
 
-    public BaseTestModel(Class<?> klass) {
+    public BaseTestModel(Class<T> klass) {
       mKlass = klass;
     }
 
@@ -76,7 +76,7 @@ public final class TestModels {
     }
 
     @Override
-    public Class<?> getModelClass() {
+    public Class<T> getModelClass() {
       return mKlass;
     }
   }

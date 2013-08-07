@@ -99,4 +99,3 @@ public class BasicFakingTest {
     mTestSubject.iNeed(TestModels.ClassWithNonBasicFieldType.class).in(mContentResolver);
   }
 }
-

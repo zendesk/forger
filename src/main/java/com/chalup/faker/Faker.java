@@ -28,6 +28,7 @@ import com.chalup.thneed.OneToOneRelationship;
 import com.chalup.thneed.PolymorphicRelationship;
 import com.chalup.thneed.RecursiveModelRelationship;
 import com.chalup.thneed.RelationshipVisitor;
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -45,6 +46,7 @@ import android.net.Uri;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
@@ -54,15 +56,25 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
   private final Map<Class<?>, FakeDataGenerator<?>> mGenerators;
   private final Multimap<Class<?>, Dependency> mDependencies = HashMultimap.create();
 
-  private interface Dependency {
+  private interface Dependency<T extends ContentResolverModel & MicroOrmModel> {
     Class<?> getDependencyClass();
 
     Collection<String> getColumns();
+
+    void satisfyDependencyWith(ContentValues contentValues, Object o);
+
+    void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<T> faker, ContentResolver resolver);
   }
 
   public Faker(ModelGraph<TModel> modelGraph, MicroOrm microOrm) {
     this(modelGraph, microOrm, getDefaultGenerators());
   }
+
+  private interface IdGetter {
+    Object getId(Object o);
+  }
+
+  private final Map<Class<?>, IdGetter> mIdGetters = Maps.newHashMap();
 
   private Faker(ModelGraph<TModel> modelGraph, MicroOrm microOrm, Map<Class<?>, FakeDataGenerator<?>> generators) {
     mMicroOrm = microOrm;
@@ -71,7 +83,36 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     modelGraph.accept(new ModelVisitor<TModel>() {
       @Override
       public void visit(TModel model) {
-        mModels.put(model.getModelClass(), model);
+        Class<?> modelClass = model.getModelClass();
+
+        mModels.put(modelClass, model);
+        mIdGetters.put(modelClass, createIdGetter(modelClass));
+      }
+
+      private IdGetter createIdGetter(Class<?> klass) {
+        for (final Field field : Fields.allFieldsIncludingPrivateAndSuper(klass)) {
+
+          Column columnAnnotation = field.getAnnotation(Column.class);
+          if (columnAnnotation != null && columnAnnotation.value().equals("id")) {
+            return new IdGetter() {
+
+              @Override
+              public Object getId(Object o) {
+                boolean wasAccessible = field.isAccessible();
+                try {
+                  field.setAccessible(true);
+                  return field.get(o);
+                } catch (IllegalAccessException e) {
+                  throw new IllegalArgumentException("Faker cannot access 'id' column in " + o, e);
+                } finally {
+                  field.setAccessible(wasAccessible);
+                }
+              }
+            };
+          }
+        }
+
+        throw new IllegalArgumentException("Faker cannot create id getter in " + klass.getName() + ". Make sure that this class has a field annotated with @Column('id').");
       }
     });
 
@@ -79,7 +120,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       @Override
       public void visit(final OneToManyRelationship<? extends TModel> relationship) {
         TModel model = relationship.mModel;
-        mDependencies.put(model.getModelClass(), new Dependency() {
+        mDependencies.put(model.getModelClass(), new Dependency<TModel>() {
           @Override
           public Class<?> getDependencyClass() {
             TModel referencedModel = relationship.mReferencedModel;
@@ -89,6 +130,21 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
           @Override
           public Collection<String> getColumns() {
             return Lists.newArrayList(relationship.mLinkedByColumn);
+          }
+
+          @Override
+          public void satisfyDependencyWith(ContentValues contentValues, Object o) {
+            Object id = mIdGetters.get(getDependencyClass()).getId(o);
+            if (id instanceof Number) {
+              contentValues.put(relationship.mLinkedByColumn, ((Number) id).longValue());
+            } else {
+              contentValues.put(relationship.mLinkedByColumn, id.toString());
+            }
+          }
+
+          @Override
+          public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
+            satisfyDependencyWith(contentValues, faker.iNeed(getDependencyClass()).in(resolver));
           }
         });
       }
@@ -109,7 +165,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       }
 
       @Override
-      public void visit(PolymorphicRelationship<? extends TModel> polymorphicRelationship) {
+      public void visit(PolymorphicRelationship<? extends TModel> relationship) {
         throw new UnsupportedOperationException("not implemented");
       }
     });
@@ -136,6 +192,8 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     Map<Dependency, Object> mSuppliedDependencies = Maps.newHashMap();
 
     public ModelBuilder<T> relatedTo(final Object parentObject) {
+      Preconditions.checkNotNull(parentObject);
+
       Collection<Dependency> dependencies = Collections2.filter(mDependencies.get(mKlass), new Predicate<Dependency>() {
         @Override
         public boolean apply(Dependency dependency) {
@@ -147,7 +205,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       case 0:
         throw new IllegalArgumentException(mKlass.getName() + " model is not related to " + parentObject.getClass().getName());
       case 1:
-        mSuppliedDependencies.put(Iterables.get(dependencies, 0), parentObject);
+        Iterables.get(dependencies, 0).satisfyDependencyWith(mContentValues, parentObject);
         break;
       default:
         throw new IllegalStateException();
@@ -157,6 +215,14 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     }
 
     public T in(ContentResolver resolver) {
+      for (Dependency dependency : mDependencies.get(mKlass)) {
+        Collection<String> keysOf = getKeysOf(mContentValues);
+        Collection columns = dependency.getColumns();
+        if (Collections.disjoint(keysOf, columns)) {
+          dependency.satisfyDependencyWithNewObject(mContentValues, Faker.this, resolver);
+        }
+      }
+
       Uri uri = resolver.insert(mModel.getUri(), mContentValues);
 
       Cursor c = resolver.query(uri, mMicroOrm.getProjection(mKlass), null, null, null);
@@ -196,7 +262,12 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
         throw new IllegalArgumentException("Faker cannot initialize fields in " + mKlass.getSimpleName() + ".", e);
       }
 
-      return mMicroOrm.toContentValues(fake);
+      ContentValues values = mMicroOrm.toContentValues(fake);
+      for (String column : dependenciesColumns) {
+        values.remove(column);
+      }
+
+      return values;
     }
 
     private T instantiateFake() {
@@ -206,6 +277,15 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
         throw new IllegalArgumentException("Faker cannot create the " + mKlass.getSimpleName() + ".", e);
       }
     }
+  }
+
+  private static Collection<String> getKeysOf(ContentValues values) {
+    return Collections2.transform(values.valueSet(), new Function<Map.Entry<String, Object>, String>() {
+      @Override
+      public String apply(Map.Entry<String, Object> entry) {
+        return entry.getKey();
+      }
+    });
   }
 
   private static final Map<Class<?>, FakeDataGenerator<?>> getDefaultGenerators() {
