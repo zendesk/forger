@@ -177,4 +177,12 @@ public class BasicFakingTest {
     assertThat(note.notableId).isEqualTo(contact.id);
     assertThat(note.notableType).isEqualTo("Contact");
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldValidateSuppliedPolymorphicObjectType() throws Exception {
+    TestModels.Deal deal = mTestSubject.iNeed(TestModels.Deal.class).in(mContentResolver);
+    assertThat(deal).isNotNull();
+
+    mTestSubject.iNeed(TestModels.Call.class).relatedTo(deal);
+  }
 }

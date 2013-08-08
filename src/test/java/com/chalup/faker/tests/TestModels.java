@@ -74,6 +74,14 @@ public final class TestModels {
     public long notableId;
   }
 
+  public static class Call extends Identifiable {
+    @Column("callable_type")
+    public String callableType;
+
+    @Column("callable_id")
+    public long callableId;
+  }
+
   public static class ClassWithoutDefaultConstructor extends Identifiable {
     public ClassWithoutDefaultConstructor(Object unused) {
     }
@@ -136,6 +144,7 @@ public final class TestModels {
   private static TestModel CONTACT_DATA = new BaseTestModel(ContactData.class);
   private static TestModel DEAL_CONTACT = new BaseTestModel(DealContact.class);
   private static TestModel NOTE = new BaseTestModel(Note.class);
+  private static TestModel CALL = new BaseTestModel(Call.class);
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
       .with(new BaseTestModel(ClassWithoutDefaultConstructor.class))
@@ -147,6 +156,7 @@ public final class TestModels {
       .the(CONTACT_DATA).isPartOf(LEAD).identified().by("lead_id")
       .the(DEAL_CONTACT).links(DEAL).by("deal_id").with(CONTACT).by("contact_id")
       .the(NOTE).references(ImmutableList.of(CONTACT, DEAL, LEAD)).by("notable_type", "notable_id")
+      .the(CALL).references(ImmutableList.of(CONTACT, LEAD)).by("callable_type", "callable_id")
       .build();
 
   private static Uri buildUriFor(Class<?> klass) {
