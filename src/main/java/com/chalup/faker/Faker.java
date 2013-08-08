@@ -125,6 +125,10 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
         }
       }
 
+      private Object getId(Object o) {
+        return mIdGetters.get(o.getClass()).getId(o);
+      }
+
       @Override
       public void visit(final OneToManyRelationship<? extends TModel> relationship) {
         TModel model = relationship.mModel;
@@ -142,8 +146,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWith(ContentValues contentValues, Object o) {
-            Object id = mIdGetters.get(getDependencyClass()).getId(o);
-            putIdIntoContentValues(contentValues, relationship.mLinkedByColumn, id);
+            putIdIntoContentValues(contentValues, relationship.mLinkedByColumn, getId(o));
           }
 
           @Override
@@ -170,8 +173,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWith(ContentValues contentValues, Object o) {
-            Object id = mIdGetters.get(getDependencyClass()).getId(o);
-            putIdIntoContentValues(contentValues, relationship.mLinkedByColumn, id);
+            putIdIntoContentValues(contentValues, relationship.mLinkedByColumn, getId(o));
           }
 
           @Override
