@@ -84,6 +84,25 @@ public final class TestModels {
     public long callableId;
   }
 
+  public static class Tag extends Identifiable {
+    @Column("value")
+    public String value;
+  }
+
+  public static class Tagging extends Identifiable {
+    @Column("taggable_type")
+    public String taggableType;
+
+    @Column("taggable_id")
+    public long taggableId;
+
+    @Column("tag_id")
+    public long tagId;
+
+    @Column("user_id")
+    public long userId;
+  }
+
   public static class ClassWithoutDefaultConstructor extends Identifiable {
     public ClassWithoutDefaultConstructor(Object unused) {
     }
@@ -147,6 +166,8 @@ public final class TestModels {
   public static TestModel DEAL_CONTACT = new BaseTestModel(DealContact.class);
   public static TestModel NOTE = new BaseTestModel(Note.class);
   public static TestModel CALL = new BaseTestModel(Call.class);
+  public static TestModel TAG = new BaseTestModel(Tag.class);
+  public static TestModel TAGGING = new BaseTestModel(Tagging.class);
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
       .with(new BaseTestModel(ClassWithoutDefaultConstructor.class))
@@ -160,6 +181,7 @@ public final class TestModels {
       .the(NOTE).references(ImmutableList.of(CONTACT, DEAL, LEAD)).by("notable_type", "notable_id")
       .the(CALL).references(ImmutableList.of(CONTACT, LEAD)).by("callable_type", "callable_id")
       .the(CONTACT).groupsOther().by("contact_id")
+      .the(TAGGING).links(TAG).by("tag_id").with(ImmutableList.of(CONTACT, LEAD, DEAL)).by("taggable_type", "taggable_id")
       .build();
 
   private static Uri buildUriFor(Class<?> klass) {

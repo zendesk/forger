@@ -35,6 +35,7 @@ import com.chalup.faker.tests.TestModels.Deal;
 import com.chalup.faker.tests.TestModels.DealContact;
 import com.chalup.faker.tests.TestModels.Lead;
 import com.chalup.faker.tests.TestModels.Note;
+import com.chalup.faker.tests.TestModels.Tagging;
 import com.chalup.faker.tests.TestModels.TestModel;
 import com.chalup.faker.tests.TestModels.User;
 import com.chalup.microorm.MicroOrm;
@@ -312,5 +313,18 @@ public class BasicFakingTest {
     mTestSubject.iNeed(Note.class)
         .with("notable_id", 42L)
         .in(mContentResolver);
+  }
+
+  @Test
+  public void shouldCreateObjectWhenOneSideOfManyToManyRelationshipIsPolymorphic() throws Exception {
+    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    assertThat(contact).isNotNull();
+
+    Tagging tagging = mTestSubject.iNeed(Tagging.class).relatedTo(contact).in(mContentResolver);
+    assertThat(tagging).isNotNull();
+    assertThat(tagging.taggableType).isEqualTo("Contact");
+    assertThat(tagging.taggableId).isEqualTo(contact.id);
+    assertThat(tagging.userId).isNotEqualTo(0);
+    assertThat(tagging.tagId).isNotEqualTo(0);
   }
 }
