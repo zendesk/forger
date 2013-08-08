@@ -154,8 +154,31 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       }
 
       @Override
-      public void visit(OneToOneRelationship<? extends TModel> oneToOneRelationship) {
-        throw new UnsupportedOperationException("not implemented");
+      public void visit(final OneToOneRelationship<? extends TModel> relationship) {
+        TModel model = relationship.mModel;
+        mDependencies.put(model.getModelClass(), new Dependency<TModel>() {
+          @Override
+          public Class<?> getDependencyClass() {
+            TModel parentModel = relationship.mParentModel;
+            return parentModel.getModelClass();
+          }
+
+          @Override
+          public Collection<String> getColumns() {
+            return Lists.newArrayList(relationship.mLinkedByColumn);
+          }
+
+          @Override
+          public void satisfyDependencyWith(ContentValues contentValues, Object o) {
+            Object id = mIdGetters.get(getDependencyClass()).getId(o);
+            putIdIntoContentValues(contentValues, relationship.mLinkedByColumn, id);
+          }
+
+          @Override
+          public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
+            satisfyDependencyWith(contentValues, faker.iNeed(getDependencyClass()).in(resolver));
+          }
+        });
       }
 
       @Override
