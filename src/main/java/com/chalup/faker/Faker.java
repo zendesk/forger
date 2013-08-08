@@ -303,6 +303,22 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     return new Faker(this, contextCopy);
   }
 
+  public FakerContextBuilder inContextOf(Class<?> klass) {
+    return new FakerContextBuilder(klass);
+  }
+
+  public class FakerContextBuilder {
+    private final Class<?> mKlass;
+
+    private FakerContextBuilder(Class<?> klass) {
+      mKlass = klass;
+    }
+
+    public Faker<TModel> in(ContentResolver resolver) {
+      return inContextOf(iNeed(mKlass).in(resolver));
+    }
+  }
+
   public class ModelBuilder<T> {
     private final TModel mModel;
     private final Class<T> mKlass;
