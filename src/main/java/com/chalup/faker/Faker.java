@@ -117,6 +117,14 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     });
 
     modelGraph.accept(new RelationshipVisitor<TModel>() {
+      private void putIdIntoContentValues(ContentValues values, String key, Object id) {
+        if (id instanceof Number) {
+          values.put(key, ((Number) id).longValue());
+        } else {
+          values.put(key, id.toString());
+        }
+      }
+
       @Override
       public void visit(final OneToManyRelationship<? extends TModel> relationship) {
         TModel model = relationship.mModel;
@@ -135,11 +143,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
           @Override
           public void satisfyDependencyWith(ContentValues contentValues, Object o) {
             Object id = mIdGetters.get(getDependencyClass()).getId(o);
-            if (id instanceof Number) {
-              contentValues.put(relationship.mLinkedByColumn, ((Number) id).longValue());
-            } else {
-              contentValues.put(relationship.mLinkedByColumn, id.toString());
-            }
+            putIdIntoContentValues(contentValues, relationship.mLinkedByColumn, id);
           }
 
           @Override
