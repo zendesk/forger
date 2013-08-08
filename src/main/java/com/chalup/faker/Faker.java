@@ -187,8 +187,8 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       }
 
       @Override
-      public void visit(ManyToManyRelationship<? extends TModel> manyToManyRelationship) {
-        throw new UnsupportedOperationException("not implemented");
+      public void visit(final ManyToManyRelationship<? extends TModel> relationship) {
+        // no implementation needed, both sides of relationship will be visited
       }
 
       @Override
