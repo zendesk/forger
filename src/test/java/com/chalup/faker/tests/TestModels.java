@@ -139,14 +139,14 @@ public final class TestModels {
     }
   }
 
-  private static PolyModel CONTACT = new PolyModel(Contact.class, "Contact");
-  private static PolyModel DEAL = new PolyModel(Deal.class, "Deal");
-  private static TestModel USER = new BaseTestModel(User.class);
-  private static PolyModel LEAD = new PolyModel(Lead.class, "Lead");
-  private static TestModel CONTACT_DATA = new BaseTestModel(ContactData.class);
-  private static TestModel DEAL_CONTACT = new BaseTestModel(DealContact.class);
-  private static TestModel NOTE = new BaseTestModel(Note.class);
-  private static TestModel CALL = new BaseTestModel(Call.class);
+  public static PolyModel CONTACT = new PolyModel(Contact.class, "Contact");
+  public static PolyModel DEAL = new PolyModel(Deal.class, "Deal");
+  public static TestModel USER = new BaseTestModel(User.class);
+  public static PolyModel LEAD = new PolyModel(Lead.class, "Lead");
+  public static TestModel CONTACT_DATA = new BaseTestModel(ContactData.class);
+  public static TestModel DEAL_CONTACT = new BaseTestModel(DealContact.class);
+  public static TestModel NOTE = new BaseTestModel(Note.class);
+  public static TestModel CALL = new BaseTestModel(Call.class);
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
       .with(new BaseTestModel(ClassWithoutDefaultConstructor.class))

@@ -296,6 +296,10 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       return this;
     }
 
+    public ModelBuilder<T> with(String key, Object value) {
+      return this;
+    }
+
     public T in(ContentResolver resolver) {
       for (Dependency dependency : mDependencies.get(mKlass)) {
         Collection<String> keysOf = getKeysOf(mContentValues);
