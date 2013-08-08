@@ -216,8 +216,6 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       mContentValues = initializeContentValues();
     }
 
-    Map<Dependency, Object> mSuppliedDependencies = Maps.newHashMap();
-
     public ModelBuilder<T> relatedTo(final Object parentObject) {
       Preconditions.checkNotNull(parentObject);
 
@@ -264,7 +262,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       T fake = instantiateFake();
 
       Collection<String> dependenciesColumns = Lists.newArrayList();
-      for (Dependency dependency : mDependencies.get(mKlass)) {
+      for (Dependency<?> dependency : mDependencies.get(mKlass)) {
         dependenciesColumns.addAll(dependency.getColumns());
       }
 
