@@ -82,10 +82,10 @@ public final class TestModels {
   public static abstract class TestModel implements ContentResolverModel, MicroOrmModel {
   }
 
-  public static class BaseTestModel<T> extends TestModel {
-    private final Class<T> mKlass;
+  public static class BaseTestModel extends TestModel {
+    private final Class<?> mKlass;
 
-    public BaseTestModel(Class<T> klass) {
+    public BaseTestModel(Class<?> klass) {
       mKlass = klass;
     }
 
@@ -95,7 +95,7 @@ public final class TestModels {
     }
 
     @Override
-    public Class<T> getModelClass() {
+    public Class<?> getModelClass() {
       return mKlass;
     }
   }
