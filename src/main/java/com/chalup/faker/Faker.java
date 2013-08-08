@@ -26,6 +26,7 @@ import com.chalup.thneed.ModelVisitor;
 import com.chalup.thneed.OneToManyRelationship;
 import com.chalup.thneed.OneToOneRelationship;
 import com.chalup.thneed.PolymorphicRelationship;
+import com.chalup.thneed.PolymorphicType;
 import com.chalup.thneed.RecursiveModelRelationship;
 import com.chalup.thneed.RelationshipVisitor;
 import com.google.common.base.Function;
@@ -33,6 +34,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -196,8 +198,45 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       }
 
       @Override
-      public void visit(PolymorphicRelationship<? extends TModel> relationship) {
-        throw new UnsupportedOperationException("not implemented");
+      public void visit(final PolymorphicRelationship<? extends TModel> relationship) {
+        TModel model = relationship.mModel;
+        mDependencies.put(model.getModelClass(), new Dependency<TModel>() {
+          @Override
+          public boolean canBeSatisfiedWith(Class<?> klass) {
+            for (TModel model : relationship.getPolymorphicModels()) {
+              if (model.getModelClass().equals(klass)) {
+                return true;
+              }
+            }
+
+            return false;
+          }
+
+          @Override
+          public Collection<String> getColumns() {
+            return Lists.newArrayList(relationship.mTypeColumnName, relationship.mIdColumnName);
+          }
+
+          @Override
+          public void satisfyDependencyWith(ContentValues contentValues, Object o) {
+            ImmutableList<? extends PolymorphicType<? extends TModel, ? extends TModel>> types = relationship.mTypes;
+            for (PolymorphicType<? extends TModel, ? extends TModel> type : types) {
+              TModel model = type.getModel();
+              if (model.getModelClass().equals(o.getClass())) {
+                contentValues.put(relationship.mTypeColumnName, type.getModelName());
+                putIdIntoContentValues(contentValues, relationship.mIdColumnName, getId(o));
+                return;
+              }
+            }
+
+            throw new IllegalStateException();
+          }
+
+          @Override
+          public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
+            throw new UnsupportedOperationException("Faker cannot automatically satisfy dependency for polymorphic relationship. Please provide object with Faker.relatedTo(Object o).");
+          }
+        });
       }
     });
   }
