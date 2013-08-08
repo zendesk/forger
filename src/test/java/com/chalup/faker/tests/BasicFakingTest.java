@@ -378,4 +378,16 @@ public class BasicFakingTest {
   public void shouldRejectContextOutsideOfModelGraph() throws Exception {
     mTestSubject.inContextOf(new Object());
   }
+
+  @Test
+  public void originalFakerShouldNotUseContext() throws Exception {
+    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    assertThat(contact).isNotNull();
+
+    mTestSubject.inContextOf(contact);
+
+    Deal deal = mTestSubject.iNeed(Deal.class).in(mContentResolver);
+    assertThat(deal).isNotNull();
+    assertThat(deal.contactId).isNotEqualTo(contact.id);
+  }
 }

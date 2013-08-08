@@ -50,14 +50,27 @@ import android.net.Uri;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
 
-  private final Map<Class<?>, TModel> mModels = Maps.newHashMap();
+  private final Map<Class<?>, TModel> mModels;
   private final MicroOrm mMicroOrm;
   private final Map<Class<?>, FakeDataGenerator<?>> mGenerators;
-  private final Multimap<Class<?>, Dependency> mDependencies = HashMultimap.create();
+  private final Multimap<Class<?>, Dependency> mDependencies;
+  private final Map<Class<?>, IdGetter> mIdGetters;
+  private final Map<Class<?>, Object> mContext;
+
+  private Faker(Faker<TModel> faker, Map<Class<?>, Object> context) {
+    mModels = faker.mModels;
+    mMicroOrm = faker.mMicroOrm;
+    mGenerators = faker.mGenerators;
+    mDependencies = faker.mDependencies;
+    mIdGetters = faker.mIdGetters;
+
+    mContext = context;
+  }
 
   private interface Dependency<T extends ContentResolverModel & MicroOrmModel> {
     boolean canBeSatisfiedWith(Class<?> klass);
@@ -77,11 +90,13 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     Object getId(Object o);
   }
 
-  private final Map<Class<?>, IdGetter> mIdGetters = Maps.newHashMap();
-
   private Faker(ModelGraph<TModel> modelGraph, MicroOrm microOrm, Map<Class<?>, FakeDataGenerator<?>> generators) {
+    mModels = Maps.newHashMap();
     mMicroOrm = microOrm;
     mGenerators = generators;
+    mDependencies = HashMultimap.create();
+    mIdGetters = Maps.newHashMap();
+    mContext = Maps.newHashMap();
 
     modelGraph.accept(new ModelVisitor<TModel>() {
       @Override
@@ -147,7 +162,13 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
           @Override
           public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
             TModel referencedModel = relationship.mReferencedModel;
-            satisfyDependencyWith(contentValues, faker.iNeed(referencedModel.getModelClass()).in(resolver));
+            Class<?> modelClass = referencedModel.getModelClass();
+
+            if (faker.mContext.containsKey(modelClass)) {
+              satisfyDependencyWith(contentValues, faker.mContext.get(modelClass));
+            } else {
+              satisfyDependencyWith(contentValues, faker.iNeed(modelClass).in(resolver));
+            }
           }
         });
       }
@@ -175,7 +196,13 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
           @Override
           public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
             TModel referencedModel = relationship.mParentModel;
-            satisfyDependencyWith(contentValues, faker.iNeed(referencedModel.getModelClass()).in(resolver));
+            Class<?> modelClass = referencedModel.getModelClass();
+
+            if (faker.mContext.containsKey(modelClass)) {
+              satisfyDependencyWith(contentValues, faker.mContext.get(modelClass));
+            } else {
+              satisfyDependencyWith(contentValues, faker.iNeed(modelClass).in(resolver));
+            }
           }
         });
       }
@@ -202,7 +229,14 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
-            contentValues.putNull(relationship.mGroupByColumn);
+            TModel model = relationship.mModel;
+            Class<?> modelClass = model.getModelClass();
+
+            if (faker.mContext.containsKey(modelClass)) {
+              satisfyDependencyWith(contentValues, faker.mContext.get(modelClass));
+            } else {
+              contentValues.putNull(relationship.mGroupByColumn);
+            }
           }
         });
       }
@@ -263,7 +297,10 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
   public Faker<TModel> inContextOf(Object o) {
     Preconditions.checkArgument(mModels.containsKey(o.getClass()), "Cannot create faking context for " + o.getClass().getName() + ", because it's not a part of ModelGraph.");
 
-    return this;
+    HashMap<Class<?>, Object> contextCopy = Maps.newHashMap(mContext);
+    contextCopy.put(o.getClass(), o);
+
+    return new Faker(this, contextCopy);
   }
 
   public class ModelBuilder<T> {
@@ -393,20 +430,20 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
   }
 
   private static final Map<Class<?>, FakeDataGenerator<?>> getDefaultGenerators() {
-      return ImmutableMap.<Class<?>, FakeDataGenerator<?>>builder()
-          .put(String.class, new FakeDataGenerators.StringGenerator())
-          .put(short.class, new FakeDataGenerators.ShortGenerator())
-          .put(int.class, new FakeDataGenerators.IntegerGenerator())
-          .put(long.class, new FakeDataGenerators.LongGenerator())
-          .put(boolean.class, new FakeDataGenerators.BooleanGenerator())
-          .put(float.class, new FakeDataGenerators.FloatGenerator())
-          .put(double.class, new FakeDataGenerators.DoubleGenerator())
-          .put(Short.class, new FakeDataGenerators.ShortGenerator())
-          .put(Integer.class, new FakeDataGenerators.IntegerGenerator())
-          .put(Long.class, new FakeDataGenerators.LongGenerator())
-          .put(Boolean.class, new FakeDataGenerators.BooleanGenerator())
-          .put(Float.class, new FakeDataGenerators.FloatGenerator())
-          .put(Double.class, new FakeDataGenerators.DoubleGenerator())
-          .build();
+    return ImmutableMap.<Class<?>, FakeDataGenerator<?>>builder()
+        .put(String.class, new FakeDataGenerators.StringGenerator())
+        .put(short.class, new FakeDataGenerators.ShortGenerator())
+        .put(int.class, new FakeDataGenerators.IntegerGenerator())
+        .put(long.class, new FakeDataGenerators.LongGenerator())
+        .put(boolean.class, new FakeDataGenerators.BooleanGenerator())
+        .put(float.class, new FakeDataGenerators.FloatGenerator())
+        .put(double.class, new FakeDataGenerators.DoubleGenerator())
+        .put(Short.class, new FakeDataGenerators.ShortGenerator())
+        .put(Integer.class, new FakeDataGenerators.IntegerGenerator())
+        .put(Long.class, new FakeDataGenerators.LongGenerator())
+        .put(Boolean.class, new FakeDataGenerators.BooleanGenerator())
+        .put(Float.class, new FakeDataGenerators.FloatGenerator())
+        .put(Double.class, new FakeDataGenerators.DoubleGenerator())
+        .build();
   }
 }
