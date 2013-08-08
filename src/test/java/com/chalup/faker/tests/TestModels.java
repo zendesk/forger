@@ -79,10 +79,10 @@ public final class TestModels {
     public UUID uuid;
   }
 
-  public static abstract class TestModel implements ContentResolverModel, MicroOrmModel {
+  public interface TestModel extends ContentResolverModel, MicroOrmModel {
   }
 
-  public static class BaseTestModel extends TestModel {
+  public static class BaseTestModel implements TestModel {
     private final Class<?> mKlass;
 
     public BaseTestModel(Class<?> klass) {
