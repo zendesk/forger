@@ -116,4 +116,45 @@ public class BasicFakingTest {
     assertThat(contactData).isNotNull();
     assertThat(contactData.leadId).isEqualTo(lead.id);
   }
+
+  @Test
+  public void shouldRecursivelySatisfyDependenciesWithNewObjectsInManyToManyRelationship() throws Exception {
+    TestModels.DealContact dealContact = mTestSubject.iNeed(TestModels.DealContact.class).in(mContentResolver);
+
+    assertThat(dealContact).isNotNull();
+    assertThat(dealContact.contactId).isNotEqualTo(0);
+    assertThat(dealContact.dealId).isNotEqualTo(0);
+  }
+
+  @Test
+  public void shouldAllowSupplyingObjectsForManyToManyRelationship() throws Exception {
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
+    assertThat(contact).isNotNull();
+
+    TestModels.Deal deal = mTestSubject.iNeed(TestModels.Deal.class).in(mContentResolver);
+    assertThat(deal).isNotNull();
+
+    TestModels.DealContact dealContact = mTestSubject
+        .iNeed(TestModels.DealContact.class)
+        .relatedTo(contact)
+        .relatedTo(deal)
+        .in(mContentResolver);
+    assertThat(dealContact).isNotNull();
+    assertThat(dealContact.contactId).isEqualTo(contact.id);
+    assertThat(dealContact.dealId).isEqualTo(deal.id);
+  }
+
+  @Test
+  public void shouldAllowSupplyingObjectsForOnlyOneSideOfManyToManyRelationship() throws Exception {
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
+    assertThat(contact).isNotNull();
+
+    TestModels.DealContact dealContact = mTestSubject
+        .iNeed(TestModels.DealContact.class)
+        .relatedTo(contact)
+        .in(mContentResolver);
+    assertThat(dealContact).isNotNull();
+    assertThat(dealContact.contactId).isEqualTo(contact.id);
+    assertThat(dealContact.dealId).isNotEqualTo(0);
+  }
 }
