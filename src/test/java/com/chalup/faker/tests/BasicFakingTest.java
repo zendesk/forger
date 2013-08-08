@@ -157,4 +157,24 @@ public class BasicFakingTest {
     assertThat(dealContact.contactId).isEqualTo(contact.id);
     assertThat(dealContact.dealId).isNotEqualTo(0);
   }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void shouldNotAllowFakingOfObjectWithMandatoryPolymorphicRelationshipWithoutSuppliedObject() throws Exception {
+    mTestSubject.iNeed(TestModels.Note.class).in(mContentResolver);
+  }
+
+  @Test
+  public void shouldAllowSupplyingObjectsForPolymorphicRelationship() throws Exception {
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
+    assertThat(contact).isNotNull();
+
+    TestModels.Note note = mTestSubject
+        .iNeed(TestModels.Note.class)
+        .relatedTo(contact)
+        .in(mContentResolver);
+
+    assertThat(note).isNotNull();
+    assertThat(note.notableId).isEqualTo(contact.id);
+    assertThat(note.notableType).isEqualTo("Contact");
+  }
 }
