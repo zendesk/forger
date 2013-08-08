@@ -30,6 +30,7 @@ import com.chalup.thneed.PolymorphicType;
 import com.chalup.thneed.RecursiveModelRelationship;
 import com.chalup.thneed.RelationshipVisitor;
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -297,6 +298,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     }
 
     public ModelBuilder<T> with(String key, Object value) {
+      putIntoContentValues(mContentValues, key, value);
       return this;
     }
 
@@ -306,6 +308,8 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
         Collection columns = dependency.getColumns();
         if (Collections.disjoint(keysOf, columns)) {
           dependency.satisfyDependencyWithNewObject(mContentValues, Faker.this, resolver);
+        } else if (!keysOf.containsAll(columns)) {
+          throw new IllegalStateException("Either override columns [" + Joiner.on(", ").join(columns) + "] using Faker.with(), or satisfy this dependency of " + mKlass.getSimpleName() + " using Faker.relatedTo().");
         }
       }
 
