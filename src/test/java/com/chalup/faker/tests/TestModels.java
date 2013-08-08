@@ -20,6 +20,8 @@ import com.chalup.faker.thneed.ContentResolverModel;
 import com.chalup.faker.thneed.MicroOrmModel;
 import com.chalup.microorm.annotations.Column;
 import com.chalup.thneed.ModelGraph;
+import com.chalup.thneed.PolymorphicType;
+import com.google.common.collect.ImmutableList;
 
 import android.content.ContentResolver;
 import android.net.Uri;
@@ -64,6 +66,14 @@ public final class TestModels {
     public long dealId;
   }
 
+  public static class Note extends Identifiable {
+    @Column("notable_type")
+    public String notableType;
+
+    @Column("notable_id")
+    public long notableId;
+  }
+
   public static class ClassWithoutDefaultConstructor extends Identifiable {
     public ClassWithoutDefaultConstructor(Object unused) {
     }
@@ -100,12 +110,32 @@ public final class TestModels {
     }
   }
 
-  private static TestModel CONTACT = new BaseTestModel(Contact.class);
-  private static TestModel DEAL = new BaseTestModel(Deal.class);
+  public static class PolyModel extends BaseTestModel implements PolymorphicType<TestModel, PolyModel> {
+    private final String mModelName;
+
+    public PolyModel(Class<?> klass, String modelName) {
+      super(klass);
+      mModelName = modelName;
+    }
+
+    @Override
+    public PolyModel getModel() {
+      return this;
+    }
+
+    @Override
+    public String getModelName() {
+      return mModelName;
+    }
+  }
+
+  private static PolyModel CONTACT = new PolyModel(Contact.class, "Contact");
+  private static PolyModel DEAL = new PolyModel(Deal.class, "Deal");
   private static TestModel USER = new BaseTestModel(User.class);
-  private static TestModel LEAD = new BaseTestModel(Lead.class);
+  private static PolyModel LEAD = new PolyModel(Lead.class, "Lead");
   private static TestModel CONTACT_DATA = new BaseTestModel(ContactData.class);
   private static TestModel DEAL_CONTACT = new BaseTestModel(DealContact.class);
+  private static TestModel NOTE = new BaseTestModel(Note.class);
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
       .with(new BaseTestModel(ClassWithoutDefaultConstructor.class))
@@ -116,6 +146,7 @@ public final class TestModels {
       .the(DEAL).references(CONTACT).by("contact_id")
       .the(CONTACT_DATA).isPartOf(LEAD).identified().by("lead_id")
       .the(DEAL_CONTACT).links(DEAL).by("deal_id").with(CONTACT).by("contact_id")
+      .the(NOTE).references(ImmutableList.of(CONTACT, DEAL, LEAD)).by("notable_type", "notable_id")
       .build();
 
   private static Uri buildUriFor(Class<?> klass) {
