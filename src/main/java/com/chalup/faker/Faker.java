@@ -188,8 +188,30 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       }
 
       @Override
-      public void visit(RecursiveModelRelationship<? extends TModel> recursiveModelRelationship) {
-        throw new UnsupportedOperationException("not implemented");
+      public void visit(final RecursiveModelRelationship<? extends TModel> relationship) {
+        TModel model = relationship.mModel;
+        mDependencies.put(model.getModelClass(), new Dependency<TModel>() {
+          @Override
+          public boolean canBeSatisfiedWith(Class<?> klass) {
+            TModel model = relationship.mModel;
+            return model.getModelClass().equals(klass);
+          }
+
+          @Override
+          public Collection<String> getColumns() {
+            return Lists.newArrayList(relationship.mGroupByColumn);
+          }
+
+          @Override
+          public void satisfyDependencyWith(ContentValues contentValues, Object o) {
+            putIdIntoContentValues(contentValues, relationship.mGroupByColumn, getId(o));
+          }
+
+          @Override
+          public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
+            contentValues.putNull(relationship.mGroupByColumn);
+          }
+        });
       }
 
       @Override
