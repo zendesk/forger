@@ -35,14 +35,17 @@ public final class TestModels {
     public long id;
   }
 
-  public static class Room extends Identifiable {
-    @Column("name")
-    public String name;
+  public static class Deal extends Identifiable {
+    @Column("contact_id")
+    public long contactId;
   }
 
-  public static class Table extends Identifiable {
-    @Column("room_id")
-    public long roomId;
+  public static class User extends Identifiable {
+    @Column("email")
+    public String email;
+  }
+
+  public static class Contact extends Identifiable {
   }
 
   public static class ClassWithoutDefaultConstructor extends Identifiable {
@@ -81,15 +84,17 @@ public final class TestModels {
     }
   }
 
-  private static TestModel ROOM = new BaseTestModel(Room.class);
-  private static TestModel TABLE = new BaseTestModel(Table.class);
+  private static TestModel CONTACT = new BaseTestModel(Contact.class);
+  private static TestModel DEAL = new BaseTestModel(Deal.class);
+  private static TestModel USER = new BaseTestModel(User.class);
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
       .with(new BaseTestModel(ClassWithoutDefaultConstructor.class))
       .with(new BaseTestModel(ClassWithoutPublicDefaultConstructor.class))
       .with(new BaseTestModel(ClassWithNonBasicFieldType.class))
+      .with(USER)
       .where()
-      .the(TABLE).references(ROOM).by("room_id")
+      .the(DEAL).references(CONTACT).by("contact_id")
       .build();
 
   private static Uri buildUriFor(Class<?> klass) {

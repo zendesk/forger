@@ -62,36 +62,36 @@ public class BasicFakingTest {
 
   @Test
   public void shouldCreateSimpleObject() throws Exception {
-    TestModels.Room room = mTestSubject.iNeed(TestModels.Room.class).in(mContentResolver);
+    TestModels.User user = mTestSubject.iNeed(TestModels.User.class).in(mContentResolver);
 
-    assertThat(room).isNotNull();
+    assertThat(user).isNotNull();
 
-    assertThat(room.id).isNotEqualTo(0);
-    assertThat(room.name).isNotNull();
+    assertThat(user.id).isNotEqualTo(0);
+    assertThat(user.email).isNotNull();
   }
 
   @Test
   public void shouldRecursivelySatisfyDependenciesWithNewObjectsInOneToManyRelationship() throws Exception {
-    TestModels.Table table = mTestSubject.iNeed(TestModels.Table.class).in(mContentResolver);
+    TestModels.Deal deal = mTestSubject.iNeed(TestModels.Deal.class).in(mContentResolver);
 
-    assertThat(table).isNotNull();
-    assertThat(table.roomId).isNotEqualTo(0);
+    assertThat(deal).isNotNull();
+    assertThat(deal.contactId).isNotEqualTo(0);
   }
 
   @Test
   public void shouldAllowSupplyingParentObjectForOneToManyRelationship() throws Exception {
-    TestModels.Room room = mTestSubject.iNeed(TestModels.Room.class).in(mContentResolver);
-    assertThat(room).isNotNull();
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
+    assertThat(contact).isNotNull();
 
-    TestModels.Table table = mTestSubject.iNeed(TestModels.Table.class).relatedTo(room).in(mContentResolver);
-    assertThat(table).isNotNull();
+    TestModels.Deal deal = mTestSubject.iNeed(TestModels.Deal.class).relatedTo(contact).in(mContentResolver);
+    assertThat(deal).isNotNull();
 
-    assertThat(table.roomId).isEqualTo(room.id);
+    assertThat(deal.contactId).isEqualTo(contact.id);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldRejectIncorrectParentObject() throws Exception {
-    mTestSubject.iNeed(TestModels.Table.class).relatedTo(new Object());
+    mTestSubject.iNeed(TestModels.Deal.class).relatedTo(new Object());
   }
 
   @Test(expected = IllegalArgumentException.class)
