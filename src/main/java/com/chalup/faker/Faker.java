@@ -261,6 +261,8 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
   }
 
   public Faker<TModel> inContextOf(Object o) {
+    Preconditions.checkArgument(mModels.containsKey(o.getClass()), "Cannot create faking context for " + o.getClass().getName() + ", because it's not a part of ModelGraph.");
+
     return this;
   }
 
