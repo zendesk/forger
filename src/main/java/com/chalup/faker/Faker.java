@@ -57,7 +57,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
   private final Multimap<Class<?>, Dependency> mDependencies = HashMultimap.create();
 
   private interface Dependency<T extends ContentResolverModel & MicroOrmModel> {
-    Class<?> getDependencyClass();
+    boolean canBeSatisfiedWith(Class<?> klass);
 
     Collection<String> getColumns();
 
@@ -134,9 +134,9 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
         TModel model = relationship.mModel;
         mDependencies.put(model.getModelClass(), new Dependency<TModel>() {
           @Override
-          public Class<?> getDependencyClass() {
-            TModel referencedModel = relationship.mReferencedModel;
-            return referencedModel.getModelClass();
+          public boolean canBeSatisfiedWith(Class<?> klass) {
+            TModel parentModel = relationship.mReferencedModel;
+            return parentModel.getModelClass().equals(klass);
           }
 
           @Override
@@ -151,7 +151,8 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
-            satisfyDependencyWith(contentValues, faker.iNeed(getDependencyClass()).in(resolver));
+            TModel referencedModel = relationship.mReferencedModel;
+            satisfyDependencyWith(contentValues, faker.iNeed(referencedModel.getModelClass()).in(resolver));
           }
         });
       }
@@ -161,9 +162,9 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
         TModel model = relationship.mModel;
         mDependencies.put(model.getModelClass(), new Dependency<TModel>() {
           @Override
-          public Class<?> getDependencyClass() {
+          public boolean canBeSatisfiedWith(Class<?> klass) {
             TModel parentModel = relationship.mParentModel;
-            return parentModel.getModelClass();
+            return parentModel.getModelClass().equals(klass);
           }
 
           @Override
@@ -178,7 +179,8 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
-            satisfyDependencyWith(contentValues, faker.iNeed(getDependencyClass()).in(resolver));
+            TModel referencedModel = relationship.mParentModel;
+            satisfyDependencyWith(contentValues, faker.iNeed(referencedModel.getModelClass()).in(resolver));
           }
         });
       }
@@ -224,7 +226,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       Collection<Dependency> dependencies = Collections2.filter(mDependencies.get(mKlass), new Predicate<Dependency>() {
         @Override
         public boolean apply(Dependency dependency) {
-          return dependency.getDependencyClass().equals(parentObject.getClass());
+          return dependency.canBeSatisfiedWith(parentObject.getClass());
         }
       });
 
