@@ -98,4 +98,22 @@ public class BasicFakingTest {
   public void shouldNotAllowCreatingClassWithNonBasicMemberTypes() throws Exception {
     mTestSubject.iNeed(TestModels.ClassWithNonBasicFieldType.class).in(mContentResolver);
   }
+
+  @Test
+  public void shouldRecursivelySatisfyDependenciesWithNewObjectsInOneToOneRelationship() throws Exception {
+    TestModels.ContactData contactData = mTestSubject.iNeed(TestModels.ContactData.class).in(mContentResolver);
+
+    assertThat(contactData).isNotNull();
+    assertThat(contactData.leadId).isNotEqualTo(0);
+  }
+
+  @Test
+  public void shouldAllowSupplyingParentObjectForOneToOneRelationship() throws Exception {
+    TestModels.Lead lead = mTestSubject.iNeed(TestModels.Lead.class).in(mContentResolver);
+    assertThat(lead).isNotNull();
+
+    TestModels.ContactData contactData = mTestSubject.iNeed(TestModels.ContactData.class).relatedTo(lead).in(mContentResolver);
+    assertThat(contactData).isNotNull();
+    assertThat(contactData.leadId).isEqualTo(lead.id);
+  }
 }
