@@ -48,6 +48,14 @@ public final class TestModels {
   public static class Contact extends Identifiable {
   }
 
+  public static class Lead extends Identifiable {
+  }
+
+  public static class ContactData extends Identifiable {
+    @Column("lead_id")
+    public long leadId;
+  }
+
   public static class ClassWithoutDefaultConstructor extends Identifiable {
     public ClassWithoutDefaultConstructor(Object unused) {
     }
@@ -87,6 +95,8 @@ public final class TestModels {
   private static TestModel CONTACT = new BaseTestModel(Contact.class);
   private static TestModel DEAL = new BaseTestModel(Deal.class);
   private static TestModel USER = new BaseTestModel(User.class);
+  private static TestModel LEAD = new BaseTestModel(Lead.class);
+  private static TestModel CONTACT_DATA = new BaseTestModel(ContactData.class);
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
       .with(new BaseTestModel(ClassWithoutDefaultConstructor.class))
@@ -95,6 +105,7 @@ public final class TestModels {
       .with(USER)
       .where()
       .the(DEAL).references(CONTACT).by("contact_id")
+      .the(CONTACT_DATA).isPartOf(LEAD).identified().by("lead_id")
       .build();
 
   private static Uri buildUriFor(Class<?> klass) {
