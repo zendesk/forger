@@ -260,6 +260,10 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     return new ModelBuilder<T>(klass);
   }
 
+  public Faker<TModel> inContextOf(Object o) {
+    return this;
+  }
+
   public class ModelBuilder<T> {
     private final TModel mModel;
     private final Class<T> mKlass;

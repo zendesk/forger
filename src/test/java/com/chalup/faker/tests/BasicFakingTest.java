@@ -327,4 +327,55 @@ public class BasicFakingTest {
     assertThat(tagging.userId).isNotEqualTo(0);
     assertThat(tagging.tagId).isNotEqualTo(0);
   }
+
+  @Test
+  public void shouldSatisfyOneToManyDependenciesFromSuppliedContext() throws Exception {
+    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    assertThat(contact).isNotNull();
+
+    Faker<TestModel> fakerWithContext = mTestSubject.inContextOf(contact);
+
+    Deal deal = fakerWithContext.iNeed(Deal.class).in(mContentResolver);
+    assertThat(deal).isNotNull();
+    assertThat(deal.contactId).isEqualTo(contact.id);
+  }
+
+  @Test
+  public void shouldSatisfyOneToOneDependenciesFromSuppliedContext() throws Exception {
+    Lead lead = mTestSubject.iNeed(Lead.class).in(mContentResolver);
+    assertThat(lead).isNotNull();
+
+    Faker<TestModel> fakerWithContext = mTestSubject.inContextOf(lead);
+
+    ContactData contactData = fakerWithContext.iNeed(ContactData.class).in(mContentResolver);
+    assertThat(contactData).isNotNull();
+    assertThat(contactData.leadId).isEqualTo(lead.id);
+  }
+
+  @Test
+  public void shouldSatisfyRecursiveDependenciesFromSuppliedContext() throws Exception {
+    Contact company = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    assertThat(company).isNotNull();
+
+    Faker<TestModel> fakerWithContext = mTestSubject.inContextOf(company);
+
+    Contact contact = fakerWithContext.iNeed(Contact.class).in(mContentResolver);
+    assertThat(contact).isNotNull();
+    assertThat(contact.contactId).isEqualTo(company.id);
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void shouldNotSatisfyPolymorphicDependenciesFromSuppliedContext() throws Exception {
+    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    assertThat(contact).isNotNull();
+
+    Faker<TestModel> fakerWithContext = mTestSubject.inContextOf(contact);
+
+    fakerWithContext.iNeed(Note.class).in(mContentResolver);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldRejectContextOutsideOfModelGraph() throws Exception {
+    mTestSubject.inContextOf(new Object());
+  }
 }
