@@ -185,4 +185,22 @@ public class BasicFakingTest {
 
     mTestSubject.iNeed(TestModels.Call.class).relatedTo(deal);
   }
+
+  @Test
+  public void shouldAllowFakingOfObjectWithRecursiveRelationshipWithoutSuppliedObject() throws Exception {
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
+
+    assertThat(contact).isNotNull();
+    assertThat(contact.contactId).isNull();
+  }
+
+  @Test
+  public void shouldAllowSupplyingObjectsForRecursiveRelationship() throws Exception {
+    TestModels.Contact company = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
+    assertThat(company).isNotNull();
+
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).relatedTo(company).in(mContentResolver);
+    assertThat(contact).isNotNull();
+    assertThat(contact.contactId).isEqualTo(company.id);
+  }
 }
