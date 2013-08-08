@@ -40,6 +40,8 @@ public final class TestModels {
   public static class Deal extends Identifiable {
     @Column("contact_id")
     public long contactId;
+    @Column("user_id")
+    public long userId;
   }
 
   public static class User extends Identifiable {
@@ -50,6 +52,9 @@ public final class TestModels {
   public static class Contact extends Identifiable {
     @Column("contact_id")
     public Long contactId;
+
+    @Column("user_id")
+    public long userId;
   }
 
   public static class Lead extends Identifiable {
@@ -182,6 +187,9 @@ public final class TestModels {
       .the(CALL).references(ImmutableList.of(CONTACT, LEAD)).by("callable_type", "callable_id")
       .the(CONTACT).groupsOther().by("contact_id")
       .the(TAGGING).links(TAG).by("tag_id").with(ImmutableList.of(CONTACT, LEAD, DEAL)).by("taggable_type", "taggable_id")
+      .the(TAGGING).references(USER).by("user_id")
+      .the(DEAL).references(USER).by("user_id")
+      .the(CONTACT).references(USER).by("user_id")
       .build();
 
   private static Uri buildUriFor(Class<?> klass) {

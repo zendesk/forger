@@ -390,4 +390,21 @@ public class BasicFakingTest {
     assertThat(deal).isNotNull();
     assertThat(deal.contactId).isNotEqualTo(contact.id);
   }
+
+  @Test
+  public void shouldUseTheSuppliedContextInAllRelationships() throws Exception {
+    Faker<TestModel> fakerWithContext = mTestSubject.inContextOf(User.class).in(mContentResolver);
+
+    Deal deal = fakerWithContext.iNeed(Deal.class).in(mContentResolver);
+    assertThat(deal).isNotNull();
+
+    Contact contact = fakerWithContext.iNeed(Contact.class).in(mContentResolver);
+    assertThat(contact).isNotNull();
+
+    Tagging tagging = fakerWithContext.iNeed(Tagging.class).relatedTo(contact).in(mContentResolver);
+    assertThat(tagging).isNotNull();
+
+    assertThat(contact.userId).isEqualTo(deal.userId);
+    assertThat(tagging.userId).isEqualTo(deal.userId);
+  }
 }
