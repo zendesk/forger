@@ -119,14 +119,6 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     });
 
     modelGraph.accept(new RelationshipVisitor<TModel>() {
-      private void putIdIntoContentValues(ContentValues values, String key, Object id) {
-        if (id instanceof Number) {
-          values.put(key, ((Number) id).longValue());
-        } else {
-          values.put(key, id.toString());
-        }
-      }
-
       private Object getId(Object o) {
         return mIdGetters.get(o.getClass()).getId(o);
       }
@@ -148,7 +140,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWith(ContentValues contentValues, Object o) {
-            putIdIntoContentValues(contentValues, relationship.mLinkedByColumn, getId(o));
+            putIntoContentValues(contentValues, relationship.mLinkedByColumn, getId(o));
           }
 
           @Override
@@ -176,7 +168,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWith(ContentValues contentValues, Object o) {
-            putIdIntoContentValues(contentValues, relationship.mLinkedByColumn, getId(o));
+            putIntoContentValues(contentValues, relationship.mLinkedByColumn, getId(o));
           }
 
           @Override
@@ -204,7 +196,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWith(ContentValues contentValues, Object o) {
-            putIdIntoContentValues(contentValues, relationship.mGroupByColumn, getId(o));
+            putIntoContentValues(contentValues, relationship.mGroupByColumn, getId(o));
           }
 
           @Override
@@ -246,7 +238,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
               TModel model = type.getModel();
               if (model.getModelClass().equals(o.getClass())) {
                 contentValues.put(relationship.mTypeColumnName, type.getModelName());
-                putIdIntoContentValues(contentValues, relationship.mIdColumnName, getId(o));
+                putIntoContentValues(contentValues, relationship.mIdColumnName, getId(o));
                 return;
               }
             }
@@ -376,6 +368,14 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
         return entry.getKey();
       }
     });
+  }
+
+  private void putIntoContentValues(ContentValues values, String key, Object o) {
+    if (o instanceof Number) {
+      values.put(key, ((Number) o).longValue());
+    } else {
+      values.put(key, o.toString());
+    }
   }
 
   private static final Map<Class<?>, FakeDataGenerator<?>> getDefaultGenerators() {
