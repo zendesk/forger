@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.chalup.faker;
+package com.chalup.forger;
 
-import com.chalup.faker.thneed.ContentResolverModel;
-import com.chalup.faker.thneed.MicroOrmModel;
+import com.chalup.forger.thneed.ContentResolverModel;
+import com.chalup.forger.thneed.MicroOrmModel;
 import com.chalup.microorm.MicroOrm;
 import com.chalup.microorm.annotations.Column;
 import com.chalup.thneed.ManyToManyRelationship;
@@ -53,7 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
+public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
   private final Map<Class<?>, TModel> mModels;
   private final MicroOrm mMicroOrm;
@@ -62,12 +62,12 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
   private final Map<Class<?>, IdGetter> mIdGetters;
   private final Map<Class<?>, Object> mContext;
 
-  private Faker(Faker<TModel> faker, Map<Class<?>, Object> context) {
-    mModels = faker.mModels;
-    mMicroOrm = faker.mMicroOrm;
-    mGenerators = faker.mGenerators;
-    mDependencies = faker.mDependencies;
-    mIdGetters = faker.mIdGetters;
+  private Forger(Forger<TModel> forger, Map<Class<?>, Object> context) {
+    mModels = forger.mModels;
+    mMicroOrm = forger.mMicroOrm;
+    mGenerators = forger.mGenerators;
+    mDependencies = forger.mDependencies;
+    mIdGetters = forger.mIdGetters;
 
     mContext = context;
   }
@@ -79,10 +79,10 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
 
     void satisfyDependencyWith(ContentValues contentValues, Object o);
 
-    void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<T> faker, ContentResolver resolver);
+    void satisfyDependencyWithNewObject(ContentValues contentValues, Forger<T> forger, ContentResolver resolver);
   }
 
-  public Faker(ModelGraph<TModel> modelGraph, MicroOrm microOrm) {
+  public Forger(ModelGraph<TModel> modelGraph, MicroOrm microOrm) {
     this(modelGraph, microOrm, getDefaultGenerators());
   }
 
@@ -90,7 +90,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     Object getId(Object o);
   }
 
-  private Faker(ModelGraph<TModel> modelGraph, MicroOrm microOrm, Map<Class<?>, FakeDataGenerator<?>> generators) {
+  private Forger(ModelGraph<TModel> modelGraph, MicroOrm microOrm, Map<Class<?>, FakeDataGenerator<?>> generators) {
     mModels = Maps.newHashMap();
     mMicroOrm = microOrm;
     mGenerators = generators;
@@ -121,7 +121,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
                   field.setAccessible(true);
                   return field.get(o);
                 } catch (IllegalAccessException e) {
-                  throw new IllegalArgumentException("Faker cannot access 'id' column in " + o, e);
+                  throw new IllegalArgumentException("Forger cannot access 'id' column in " + o, e);
                 } finally {
                   field.setAccessible(wasAccessible);
                 }
@@ -130,7 +130,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
           }
         }
 
-        throw new IllegalArgumentException("Faker cannot create id getter in " + klass.getName() + ". Make sure that this class has a field annotated with @Column('id').");
+        throw new IllegalArgumentException("Forger cannot create id getter in " + klass.getName() + ". Make sure that this class has a field annotated with @Column('id').");
       }
     });
 
@@ -160,14 +160,14 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
           }
 
           @Override
-          public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
+          public void satisfyDependencyWithNewObject(ContentValues contentValues, Forger<TModel> forger, ContentResolver resolver) {
             TModel referencedModel = relationship.mReferencedModel;
             Class<?> modelClass = referencedModel.getModelClass();
 
-            if (faker.mContext.containsKey(modelClass)) {
-              satisfyDependencyWith(contentValues, faker.mContext.get(modelClass));
+            if (forger.mContext.containsKey(modelClass)) {
+              satisfyDependencyWith(contentValues, forger.mContext.get(modelClass));
             } else {
-              satisfyDependencyWith(contentValues, faker.iNeed(modelClass).in(resolver));
+              satisfyDependencyWith(contentValues, forger.iNeed(modelClass).in(resolver));
             }
           }
         });
@@ -194,14 +194,14 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
           }
 
           @Override
-          public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
+          public void satisfyDependencyWithNewObject(ContentValues contentValues, Forger<TModel> forger, ContentResolver resolver) {
             TModel referencedModel = relationship.mParentModel;
             Class<?> modelClass = referencedModel.getModelClass();
 
-            if (faker.mContext.containsKey(modelClass)) {
-              satisfyDependencyWith(contentValues, faker.mContext.get(modelClass));
+            if (forger.mContext.containsKey(modelClass)) {
+              satisfyDependencyWith(contentValues, forger.mContext.get(modelClass));
             } else {
-              satisfyDependencyWith(contentValues, faker.iNeed(modelClass).in(resolver));
+              satisfyDependencyWith(contentValues, forger.iNeed(modelClass).in(resolver));
             }
           }
         });
@@ -228,12 +228,12 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
           }
 
           @Override
-          public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
+          public void satisfyDependencyWithNewObject(ContentValues contentValues, Forger<TModel> forger, ContentResolver resolver) {
             TModel model = relationship.mModel;
             Class<?> modelClass = model.getModelClass();
 
-            if (faker.mContext.containsKey(modelClass)) {
-              satisfyDependencyWith(contentValues, faker.mContext.get(modelClass));
+            if (forger.mContext.containsKey(modelClass)) {
+              satisfyDependencyWith(contentValues, forger.mContext.get(modelClass));
             } else {
               contentValues.putNull(relationship.mGroupByColumn);
             }
@@ -282,8 +282,8 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
           }
 
           @Override
-          public void satisfyDependencyWithNewObject(ContentValues contentValues, Faker<TModel> faker, ContentResolver resolver) {
-            throw new UnsupportedOperationException("Faker cannot automatically satisfy dependency for polymorphic relationship. Please provide object with Faker.relatedTo(Object o).");
+          public void satisfyDependencyWithNewObject(ContentValues contentValues, Forger<TModel> forger, ContentResolver resolver) {
+            throw new UnsupportedOperationException("Forger cannot automatically satisfy dependency for polymorphic relationship. Please provide object with Forger.relatedTo(Object o).");
           }
         });
       }
@@ -294,27 +294,27 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
     return new ModelBuilder<T>(klass);
   }
 
-  public Faker<TModel> inContextOf(Object o) {
+  public Forger<TModel> inContextOf(Object o) {
     Preconditions.checkArgument(mModels.containsKey(o.getClass()), "Cannot create faking context for " + o.getClass().getName() + ", because it's not a part of ModelGraph.");
 
     HashMap<Class<?>, Object> contextCopy = Maps.newHashMap(mContext);
     contextCopy.put(o.getClass(), o);
 
-    return new Faker(this, contextCopy);
+    return new Forger(this, contextCopy);
   }
 
-  public FakerContextBuilder inContextOf(Class<?> klass) {
-    return new FakerContextBuilder(klass);
+  public ContextBuilder inContextOf(Class<?> klass) {
+    return new ContextBuilder(klass);
   }
 
-  public class FakerContextBuilder {
+  public class ContextBuilder {
     private final Class<?> mKlass;
 
-    private FakerContextBuilder(Class<?> klass) {
+    private ContextBuilder(Class<?> klass) {
       mKlass = klass;
     }
 
-    public Faker<TModel> in(ContentResolver resolver) {
+    public Forger<TModel> in(ContentResolver resolver) {
       return inContextOf(iNeed(mKlass).in(resolver));
     }
   }
@@ -328,7 +328,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       mKlass = klass;
 
       mModel = mModels.get(klass);
-      Preconditions.checkNotNull(mModel, "Faker cannot create an object of " + klass.getSimpleName() + " from the provided ModelGraph");
+      Preconditions.checkNotNull(mModel, "Forger cannot create an object of " + klass.getSimpleName() + " from the provided ModelGraph");
 
       mContentValues = initializeContentValues();
     }
@@ -366,9 +366,9 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
         Collection<String> keysOf = getKeysOf(mContentValues);
         Collection columns = dependency.getColumns();
         if (Collections.disjoint(keysOf, columns)) {
-          dependency.satisfyDependencyWithNewObject(mContentValues, Faker.this, resolver);
+          dependency.satisfyDependencyWithNewObject(mContentValues, Forger.this, resolver);
         } else if (!keysOf.containsAll(columns)) {
-          throw new IllegalStateException("Either override columns [" + Joiner.on(", ").join(columns) + "] using Faker.with(), or satisfy this dependency of " + mKlass.getSimpleName() + " using Faker.relatedTo().");
+          throw new IllegalStateException("Either override columns [" + Joiner.on(", ").join(columns) + "] using Forger.with(), or satisfy this dependency of " + mKlass.getSimpleName() + " using Forger.relatedTo().");
         }
       }
 
@@ -400,7 +400,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
             if (!dependenciesColumns.contains(columnAnnotation.value())) {
               Class<?> fieldType = field.getType();
 
-              Preconditions.checkArgument(mGenerators.containsKey(fieldType), "Faker doesn't know how to fake the " + fieldType.getName());
+              Preconditions.checkArgument(mGenerators.containsKey(fieldType), "Forger doesn't know how to fake the " + fieldType.getName());
               field.set(fake, mGenerators.get(fieldType).generate());
             }
           }
@@ -408,7 +408,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
           field.setAccessible(wasAccessible);
         }
       } catch (IllegalAccessException e) {
-        throw new IllegalArgumentException("Faker cannot initialize fields in " + mKlass.getSimpleName() + ".", e);
+        throw new IllegalArgumentException("Forger cannot initialize fields in " + mKlass.getSimpleName() + ".", e);
       }
 
       ContentValues values = mMicroOrm.toContentValues(fake);
@@ -423,7 +423,7 @@ public class Faker<TModel extends ContentResolverModel & MicroOrmModel> {
       try {
         return mKlass.newInstance();
       } catch (Exception e) {
-        throw new IllegalArgumentException("Faker cannot create the " + mKlass.getSimpleName() + ".", e);
+        throw new IllegalArgumentException("Forger cannot create the " + mKlass.getSimpleName() + ".", e);
       }
     }
   }

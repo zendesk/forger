@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package com.chalup.faker.thneed;
+package com.chalup.forger.thneed;
 
-import android.net.Uri;
-
-public interface ContentResolverModel {
-  public Uri getUri();
+public interface MicroOrmModel {
+  public Class<?> getModelClass();
 }

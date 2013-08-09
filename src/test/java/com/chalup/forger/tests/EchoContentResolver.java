@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.chalup.faker.tests;
+package com.chalup.forger.tests;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -34,7 +34,6 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.CursorWrapper;
 import android.database.MatrixCursor;
 import android.net.Uri;
 

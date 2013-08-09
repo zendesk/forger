@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-package com.chalup.faker;
+package com.chalup.forger.thneed;
 
-import com.google.common.collect.Lists;
+import android.net.Uri;
 
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-
-class Fields {
-
-  static List<Field> allFieldsIncludingPrivateAndSuper(Class<?> klass) {
-    List<Field> fields = Lists.newArrayList();
-    while (!klass.equals(Object.class)) {
-      Collections.addAll(fields, klass.getDeclaredFields());
-      klass = klass.getSuperclass();
-    }
-    return fields;
-  }
-
+public interface ContentResolverModel {
+  public Uri getUri();
 }

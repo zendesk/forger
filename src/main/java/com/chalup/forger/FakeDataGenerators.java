@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.chalup.faker;
-
-import java.util.Random;
+package com.chalup.forger;
 
 interface FakeDataGenerators {
   public static class StringGenerator implements FakeDataGenerator<String> {

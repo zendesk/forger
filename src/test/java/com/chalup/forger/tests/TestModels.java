@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.chalup.faker.tests;
+package com.chalup.forger.tests;
 
-import com.chalup.faker.thneed.ContentResolverModel;
-import com.chalup.faker.thneed.MicroOrmModel;
+import com.chalup.forger.thneed.ContentResolverModel;
+import com.chalup.forger.thneed.MicroOrmModel;
 import com.chalup.microorm.annotations.Column;
 import com.chalup.thneed.ModelGraph;
 import com.chalup.thneed.PolymorphicType;

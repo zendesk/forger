@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-package com.chalup.faker.tests;
+package com.chalup.forger.tests;
 
-import static com.chalup.faker.tests.TestModels.CONTACT;
-import static com.chalup.faker.tests.TestModels.DEAL;
-import static com.chalup.faker.tests.TestModels.LEAD;
-import static com.chalup.faker.tests.TestModels.MODEL_GRAPH;
+import static com.chalup.forger.tests.TestModels.CONTACT;
+import static com.chalup.forger.tests.TestModels.DEAL;
+import static com.chalup.forger.tests.TestModels.LEAD;
+import static com.chalup.forger.tests.TestModels.MODEL_GRAPH;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-import com.chalup.faker.Faker;
-import com.chalup.faker.tests.TestModels.Call;
-import com.chalup.faker.tests.TestModels.ClassWithNonBasicFieldType;
-import com.chalup.faker.tests.TestModels.ClassWithoutDefaultConstructor;
-import com.chalup.faker.tests.TestModels.ClassWithoutPublicDefaultConstructor;
-import com.chalup.faker.tests.TestModels.Contact;
-import com.chalup.faker.tests.TestModels.ContactData;
-import com.chalup.faker.tests.TestModels.Deal;
-import com.chalup.faker.tests.TestModels.DealContact;
-import com.chalup.faker.tests.TestModels.Lead;
-import com.chalup.faker.tests.TestModels.Note;
-import com.chalup.faker.tests.TestModels.Tagging;
-import com.chalup.faker.tests.TestModels.TestModel;
-import com.chalup.faker.tests.TestModels.User;
+import com.chalup.forger.Forger;
+import com.chalup.forger.tests.TestModels.Call;
+import com.chalup.forger.tests.TestModels.ClassWithNonBasicFieldType;
+import com.chalup.forger.tests.TestModels.ClassWithoutDefaultConstructor;
+import com.chalup.forger.tests.TestModels.ClassWithoutPublicDefaultConstructor;
+import com.chalup.forger.tests.TestModels.Contact;
+import com.chalup.forger.tests.TestModels.ContactData;
+import com.chalup.forger.tests.TestModels.Deal;
+import com.chalup.forger.tests.TestModels.DealContact;
+import com.chalup.forger.tests.TestModels.Lead;
+import com.chalup.forger.tests.TestModels.Note;
+import com.chalup.forger.tests.TestModels.Tagging;
+import com.chalup.forger.tests.TestModels.TestModel;
+import com.chalup.forger.tests.TestModels.User;
 import com.chalup.microorm.MicroOrm;
 
 import org.junit.Before;
@@ -53,12 +53,12 @@ import android.content.ContentValues;
 @Config(manifest = Config.NONE)
 public class BasicFakingTest {
 
-  Faker<TestModel> mTestSubject;
+  Forger<TestModel> mTestSubject;
   ContentResolver mContentResolver;
 
   @Before
   public void setUp() throws Exception {
-    mTestSubject = new Faker<TestModel>(MODEL_GRAPH, new MicroOrm());
+    mTestSubject = new Forger<TestModel>(MODEL_GRAPH, new MicroOrm());
     mContentResolver = EchoContentResolver.get();
   }
 
@@ -333,9 +333,9 @@ public class BasicFakingTest {
     Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
-    Faker<TestModel> fakerWithContext = mTestSubject.inContextOf(contact);
+    Forger<TestModel> forgerWithContext = mTestSubject.inContextOf(contact);
 
-    Deal deal = fakerWithContext.iNeed(Deal.class).in(mContentResolver);
+    Deal deal = forgerWithContext.iNeed(Deal.class).in(mContentResolver);
     assertThat(deal).isNotNull();
     assertThat(deal.contactId).isEqualTo(contact.id);
   }
@@ -345,9 +345,9 @@ public class BasicFakingTest {
     Lead lead = mTestSubject.iNeed(Lead.class).in(mContentResolver);
     assertThat(lead).isNotNull();
 
-    Faker<TestModel> fakerWithContext = mTestSubject.inContextOf(lead);
+    Forger<TestModel> forgerWithContext = mTestSubject.inContextOf(lead);
 
-    ContactData contactData = fakerWithContext.iNeed(ContactData.class).in(mContentResolver);
+    ContactData contactData = forgerWithContext.iNeed(ContactData.class).in(mContentResolver);
     assertThat(contactData).isNotNull();
     assertThat(contactData.leadId).isEqualTo(lead.id);
   }
@@ -357,9 +357,9 @@ public class BasicFakingTest {
     Contact company = mTestSubject.iNeed(Contact.class).in(mContentResolver);
     assertThat(company).isNotNull();
 
-    Faker<TestModel> fakerWithContext = mTestSubject.inContextOf(company);
+    Forger<TestModel> forgerWithContext = mTestSubject.inContextOf(company);
 
-    Contact contact = fakerWithContext.iNeed(Contact.class).in(mContentResolver);
+    Contact contact = forgerWithContext.iNeed(Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
     assertThat(contact.contactId).isEqualTo(company.id);
   }
@@ -369,9 +369,9 @@ public class BasicFakingTest {
     Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
-    Faker<TestModel> fakerWithContext = mTestSubject.inContextOf(contact);
+    Forger<TestModel> forgerWithContext = mTestSubject.inContextOf(contact);
 
-    fakerWithContext.iNeed(Note.class).in(mContentResolver);
+    forgerWithContext.iNeed(Note.class).in(mContentResolver);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -380,7 +380,7 @@ public class BasicFakingTest {
   }
 
   @Test
-  public void originalFakerShouldNotUseContext() throws Exception {
+  public void originalForgerShouldNotUseContext() throws Exception {
     Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
@@ -393,15 +393,15 @@ public class BasicFakingTest {
 
   @Test
   public void shouldUseTheSuppliedContextInAllRelationships() throws Exception {
-    Faker<TestModel> fakerWithContext = mTestSubject.inContextOf(User.class).in(mContentResolver);
+    Forger<TestModel> forgerWithContext = mTestSubject.inContextOf(User.class).in(mContentResolver);
 
-    Deal deal = fakerWithContext.iNeed(Deal.class).in(mContentResolver);
+    Deal deal = forgerWithContext.iNeed(Deal.class).in(mContentResolver);
     assertThat(deal).isNotNull();
 
-    Contact contact = fakerWithContext.iNeed(Contact.class).in(mContentResolver);
+    Contact contact = forgerWithContext.iNeed(Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
-    Tagging tagging = fakerWithContext.iNeed(Tagging.class).relatedTo(contact).in(mContentResolver);
+    Tagging tagging = forgerWithContext.iNeed(Tagging.class).relatedTo(contact).in(mContentResolver);
     assertThat(tagging).isNotNull();
 
     assertThat(contact.userId).isEqualTo(deal.userId);

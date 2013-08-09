@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-package com.chalup.faker.tests;
+package com.chalup.forger;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE)
-public class CanaryTest {
-  @Test
-  public void canaryTest() throws Exception {
-  }
+public interface FakeDataGenerator<T> {
+  T generate();
 }
