@@ -18,17 +18,6 @@ package com.chalup.forger;
 
 import com.chalup.forger.thneed.ContentResolverModel;
 import com.chalup.forger.thneed.MicroOrmModel;
-import com.chalup.microorm.MicroOrm;
-import com.chalup.microorm.annotations.Column;
-import com.chalup.thneed.ManyToManyRelationship;
-import com.chalup.thneed.ModelGraph;
-import com.chalup.thneed.ModelVisitor;
-import com.chalup.thneed.OneToManyRelationship;
-import com.chalup.thneed.OneToOneRelationship;
-import com.chalup.thneed.PolymorphicRelationship;
-import com.chalup.thneed.PolymorphicType;
-import com.chalup.thneed.RecursiveModelRelationship;
-import com.chalup.thneed.RelationshipVisitor;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -41,6 +30,18 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+
+import org.chalup.microorm.MicroOrm;
+import org.chalup.microorm.annotations.Column;
+import org.chalup.thneed.ManyToManyRelationship;
+import org.chalup.thneed.ModelGraph;
+import org.chalup.thneed.ModelVisitor;
+import org.chalup.thneed.OneToManyRelationship;
+import org.chalup.thneed.OneToOneRelationship;
+import org.chalup.thneed.PolymorphicRelationship;
+import org.chalup.thneed.PolymorphicType;
+import org.chalup.thneed.RecursiveModelRelationship;
+import org.chalup.thneed.RelationshipVisitor;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;

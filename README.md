@@ -91,15 +91,14 @@ assertThat(session.block_id).isNotEqualTo(0);
 
 It might look like a lot of boilerplate code, but it still beats writing all helper methods for your tests by hand, especially when the number of data models and connections between them grows to several dozens.
 
-Compilation instructions
-------------------------
 
-Dependencies for this project are not yet published in Maven Central, so to compile this project you have to clone and `mvn install` the following projects:
-
-    git clone https://github.com/chalup/microorm.git
-    git clone https://github.com/chalup/thneed.git
-
-I'll fix this sorry state of things ASAP.
+Building
+--------
+This is standard maven project. To build it just execute:
+```shell
+mvn clean package
+```
+in directory with pom.xml.
 
 Caveats
 -------

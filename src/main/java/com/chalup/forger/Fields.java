@@ -32,5 +32,4 @@ class Fields {
     }
     return fields;
   }
-
 }

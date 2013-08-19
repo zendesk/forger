@@ -18,12 +18,12 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>com.chalup.microorm</groupId>
+      <groupId>org.chalup.microorm</groupId>
       <artifactId>microorm</artifactId>
       <version>0.1</version>
     </dependency>
     <dependency>
-      <groupId>com.chalup.thneed</groupId>
+      <groupId>org.chalup.thneed</groupId>
       <artifactId>thneed</artifactId>
       <version>0.1</version>
     </dependency>

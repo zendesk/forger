@@ -38,8 +38,8 @@ import com.chalup.forger.tests.TestModels.Note;
 import com.chalup.forger.tests.TestModels.Tagging;
 import com.chalup.forger.tests.TestModels.TestModel;
 import com.chalup.forger.tests.TestModels.User;
-import com.chalup.microorm.MicroOrm;
 
+import org.chalup.microorm.MicroOrm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

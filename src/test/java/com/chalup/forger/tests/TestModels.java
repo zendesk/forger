@@ -18,10 +18,11 @@ package com.chalup.forger.tests;
 
 import com.chalup.forger.thneed.ContentResolverModel;
 import com.chalup.forger.thneed.MicroOrmModel;
-import com.chalup.microorm.annotations.Column;
-import com.chalup.thneed.ModelGraph;
-import com.chalup.thneed.PolymorphicType;
 import com.google.common.collect.ImmutableList;
+
+import org.chalup.microorm.annotations.Column;
+import org.chalup.thneed.ModelGraph;
+import org.chalup.thneed.PolymorphicType;
 
 import android.content.ContentResolver;
 import android.net.Uri;
