@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.chalup.forger;
+package com.getbase.forger;
 
-import com.chalup.forger.thneed.ContentResolverModel;
-import com.chalup.forger.thneed.MicroOrmModel;
+import com.getbase.forger.thneed.ContentResolverModel;
+import com.getbase.forger.thneed.MicroOrmModel;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;

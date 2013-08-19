@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.chalup.forger;
+package com.getbase.forger;
 
 interface FakeDataGenerators {
   public static class StringGenerator implements FakeDataGenerator<String> {

@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-package com.chalup.forger.tests;
+package com.getbase.forger.thneed;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE)
-public class CanaryTest {
-  @Test
-  public void canaryTest() throws Exception {
-  }
+public interface MicroOrmModel {
+  public Class<?> getModelClass();
 }

@@ -14,35 +14,19 @@
  * limitations under the License.
  */
 
-package com.chalup.forger.tests;
+package com.getbase.forger.tests;
 
-import static com.chalup.forger.tests.TestModels.CONTACT;
-import static com.chalup.forger.tests.TestModels.DEAL;
-import static com.chalup.forger.tests.TestModels.LEAD;
-import static com.chalup.forger.tests.TestModels.MODEL_GRAPH;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-import com.chalup.forger.Forger;
-import com.chalup.forger.tests.TestModels.Call;
-import com.chalup.forger.tests.TestModels.ClassWithNonBasicFieldType;
-import com.chalup.forger.tests.TestModels.ClassWithoutDefaultConstructor;
-import com.chalup.forger.tests.TestModels.ClassWithoutPublicDefaultConstructor;
-import com.chalup.forger.tests.TestModels.Contact;
-import com.chalup.forger.tests.TestModels.ContactData;
-import com.chalup.forger.tests.TestModels.Deal;
-import com.chalup.forger.tests.TestModels.DealContact;
-import com.chalup.forger.tests.TestModels.Lead;
-import com.chalup.forger.tests.TestModels.Note;
-import com.chalup.forger.tests.TestModels.Tagging;
-import com.chalup.forger.tests.TestModels.TestModel;
-import com.chalup.forger.tests.TestModels.User;
+import com.getbase.forger.Forger;
 
 import org.chalup.microorm.MicroOrm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -53,12 +37,12 @@ import android.content.ContentValues;
 @Config(manifest = Config.NONE)
 public class BasicFakingTest {
 
-  Forger<TestModel> mTestSubject;
+  Forger<TestModels.TestModel> mTestSubject;
   ContentResolver mContentResolver;
 
   @Before
   public void setUp() throws Exception {
-    mTestSubject = new Forger<TestModel>(MODEL_GRAPH, new MicroOrm());
+    mTestSubject = new Forger<TestModels.TestModel>(TestModels.MODEL_GRAPH, new MicroOrm());
     mContentResolver = EchoContentResolver.get();
   }
 
@@ -72,17 +56,17 @@ public class BasicFakingTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldNotAllowCreatingClassWithoutDefaultConstructor() throws Exception {
-    mTestSubject.iNeed(ClassWithoutDefaultConstructor.class).in(mContentResolver);
+    mTestSubject.iNeed(TestModels.ClassWithoutDefaultConstructor.class).in(mContentResolver);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldNotAllowCreatingClassWithoutPublicDefaultConstructor() throws Exception {
-    mTestSubject.iNeed(ClassWithoutPublicDefaultConstructor.class).in(mContentResolver);
+    mTestSubject.iNeed(TestModels.ClassWithoutPublicDefaultConstructor.class).in(mContentResolver);
   }
 
   @Test
   public void shouldCreateSimpleObject() throws Exception {
-    User user = mTestSubject.iNeed(User.class).in(mContentResolver);
+    TestModels.User user = mTestSubject.iNeed(TestModels.User.class).in(mContentResolver);
 
     assertThat(user).isNotNull();
 
@@ -92,7 +76,7 @@ public class BasicFakingTest {
 
   @Test
   public void shouldRecursivelySatisfyDependenciesWithNewObjectsInOneToManyRelationship() throws Exception {
-    Deal deal = mTestSubject.iNeed(Deal.class).in(mContentResolver);
+    TestModels.Deal deal = mTestSubject.iNeed(TestModels.Deal.class).in(mContentResolver);
 
     assertThat(deal).isNotNull();
     assertThat(deal.contactId).isNotEqualTo(0);
@@ -100,10 +84,10 @@ public class BasicFakingTest {
 
   @Test
   public void shouldAllowSupplyingParentObjectForOneToManyRelationship() throws Exception {
-    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
-    Deal deal = mTestSubject.iNeed(Deal.class).relatedTo(contact).in(mContentResolver);
+    TestModels.Deal deal = mTestSubject.iNeed(TestModels.Deal.class).relatedTo(contact).in(mContentResolver);
     assertThat(deal).isNotNull();
 
     assertThat(deal.contactId).isEqualTo(contact.id);
@@ -111,17 +95,17 @@ public class BasicFakingTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldRejectIncorrectParentObject() throws Exception {
-    mTestSubject.iNeed(Deal.class).relatedTo(new Object());
+    mTestSubject.iNeed(TestModels.Deal.class).relatedTo(new Object());
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldNotAllowCreatingClassWithNonBasicMemberTypes() throws Exception {
-    mTestSubject.iNeed(ClassWithNonBasicFieldType.class).in(mContentResolver);
+    mTestSubject.iNeed(TestModels.ClassWithNonBasicFieldType.class).in(mContentResolver);
   }
 
   @Test
   public void shouldRecursivelySatisfyDependenciesWithNewObjectsInOneToOneRelationship() throws Exception {
-    ContactData contactData = mTestSubject.iNeed(ContactData.class).in(mContentResolver);
+    TestModels.ContactData contactData = mTestSubject.iNeed(TestModels.ContactData.class).in(mContentResolver);
 
     assertThat(contactData).isNotNull();
     assertThat(contactData.leadId).isNotEqualTo(0);
@@ -129,17 +113,17 @@ public class BasicFakingTest {
 
   @Test
   public void shouldAllowSupplyingParentObjectForOneToOneRelationship() throws Exception {
-    Lead lead = mTestSubject.iNeed(Lead.class).in(mContentResolver);
+    TestModels.Lead lead = mTestSubject.iNeed(TestModels.Lead.class).in(mContentResolver);
     assertThat(lead).isNotNull();
 
-    ContactData contactData = mTestSubject.iNeed(ContactData.class).relatedTo(lead).in(mContentResolver);
+    TestModels.ContactData contactData = mTestSubject.iNeed(TestModels.ContactData.class).relatedTo(lead).in(mContentResolver);
     assertThat(contactData).isNotNull();
     assertThat(contactData.leadId).isEqualTo(lead.id);
   }
 
   @Test
   public void shouldRecursivelySatisfyDependenciesWithNewObjectsInManyToManyRelationship() throws Exception {
-    DealContact dealContact = mTestSubject.iNeed(DealContact.class).in(mContentResolver);
+    TestModels.DealContact dealContact = mTestSubject.iNeed(TestModels.DealContact.class).in(mContentResolver);
 
     assertThat(dealContact).isNotNull();
     assertThat(dealContact.contactId).isNotEqualTo(0);
@@ -148,14 +132,14 @@ public class BasicFakingTest {
 
   @Test
   public void shouldAllowSupplyingObjectsForManyToManyRelationship() throws Exception {
-    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
-    Deal deal = mTestSubject.iNeed(Deal.class).in(mContentResolver);
+    TestModels.Deal deal = mTestSubject.iNeed(TestModels.Deal.class).in(mContentResolver);
     assertThat(deal).isNotNull();
 
-    DealContact dealContact = mTestSubject
-        .iNeed(DealContact.class)
+    TestModels.DealContact dealContact = mTestSubject
+        .iNeed(TestModels.DealContact.class)
         .relatedTo(contact)
         .relatedTo(deal)
         .in(mContentResolver);
@@ -166,11 +150,11 @@ public class BasicFakingTest {
 
   @Test
   public void shouldAllowSupplyingObjectsForOnlyOneSideOfManyToManyRelationship() throws Exception {
-    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
-    DealContact dealContact = mTestSubject
-        .iNeed(DealContact.class)
+    TestModels.DealContact dealContact = mTestSubject
+        .iNeed(TestModels.DealContact.class)
         .relatedTo(contact)
         .in(mContentResolver);
     assertThat(dealContact).isNotNull();
@@ -180,16 +164,16 @@ public class BasicFakingTest {
 
   @Test(expected = UnsupportedOperationException.class)
   public void shouldNotAllowFakingOfObjectWithMandatoryPolymorphicRelationshipWithoutSuppliedObject() throws Exception {
-    mTestSubject.iNeed(Note.class).in(mContentResolver);
+    mTestSubject.iNeed(TestModels.Note.class).in(mContentResolver);
   }
 
   @Test
   public void shouldAllowSupplyingObjectsForPolymorphicRelationship() throws Exception {
-    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
-    Note note = mTestSubject
-        .iNeed(Note.class)
+    TestModels.Note note = mTestSubject
+        .iNeed(TestModels.Note.class)
         .relatedTo(contact)
         .in(mContentResolver);
 
@@ -200,15 +184,15 @@ public class BasicFakingTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldValidateSuppliedPolymorphicObjectType() throws Exception {
-    Deal deal = mTestSubject.iNeed(Deal.class).in(mContentResolver);
+    TestModels.Deal deal = mTestSubject.iNeed(TestModels.Deal.class).in(mContentResolver);
     assertThat(deal).isNotNull();
 
-    mTestSubject.iNeed(Call.class).relatedTo(deal);
+    mTestSubject.iNeed(TestModels.Call.class).relatedTo(deal);
   }
 
   @Test
   public void shouldAllowFakingOfObjectWithRecursiveRelationshipWithoutSuppliedObject() throws Exception {
-    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
 
     assertThat(contact).isNotNull();
     assertThat(contact.contactId).isNull();
@@ -216,10 +200,10 @@ public class BasicFakingTest {
 
   @Test
   public void shouldAllowSupplyingObjectsForRecursiveRelationship() throws Exception {
-    Contact company = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact company = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(company).isNotNull();
 
-    Contact contact = mTestSubject.iNeed(Contact.class).relatedTo(company).in(mContentResolver);
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).relatedTo(company).in(mContentResolver);
     assertThat(contact).isNotNull();
     assertThat(contact.contactId).isEqualTo(company.id);
   }
@@ -227,8 +211,8 @@ public class BasicFakingTest {
   @Test
   public void shouldAllowOverridingFieldsInSimpleObjects() throws Exception {
     String email = "test@getbase.com";
-    User user = mTestSubject
-        .iNeed(User.class)
+    TestModels.User user = mTestSubject
+        .iNeed(TestModels.User.class)
         .with("email", email)
         .in(mContentResolver);
 
@@ -239,30 +223,30 @@ public class BasicFakingTest {
   @Test
   public void shouldNotTryToSatisfyDependenciesForOverriddenFieldsOfOneToManyRelationship() throws Exception {
     long contactId = 42L;
-    Deal deal = mTestSubject.iNeed(Deal.class).with("contact_id", contactId).in(mContentResolver);
+    TestModels.Deal deal = mTestSubject.iNeed(TestModels.Deal.class).with("contact_id", contactId).in(mContentResolver);
 
     assertThat(deal).isNotNull();
     assertThat(deal.contactId).isEqualTo(contactId);
 
-    verify(mContentResolver, never()).insert(eq(CONTACT.getUri()), any(ContentValues.class));
+    verify(mContentResolver, never()).insert(Matchers.eq(TestModels.CONTACT.getUri()), any(ContentValues.class));
   }
 
   @Test
   public void shouldNotTryToSatisfyDependenciesForOverriddenFieldsOfOneToOneRelationship() throws Exception {
     long leadId = 42L;
-    ContactData contactData = mTestSubject.iNeed(ContactData.class).with("lead_id", leadId).in(mContentResolver);
+    TestModels.ContactData contactData = mTestSubject.iNeed(TestModels.ContactData.class).with("lead_id", leadId).in(mContentResolver);
 
     assertThat(contactData).isNotNull();
     assertThat(contactData.leadId).isEqualTo(leadId);
 
-    verify(mContentResolver, never()).insert(eq(LEAD.getUri()), any(ContentValues.class));
+    verify(mContentResolver, never()).insert(Matchers.eq(TestModels.LEAD.getUri()), any(ContentValues.class));
   }
 
   @Test
   public void shouldNotTryToSatisfyDependenciesForOverriddenFieldsOfManyToManyRelationship() throws Exception {
     long contactId = 42L;
     long dealId = 7L;
-    DealContact dealContact = mTestSubject.iNeed(DealContact.class)
+    TestModels.DealContact dealContact = mTestSubject.iNeed(TestModels.DealContact.class)
         .with("contact_id", contactId)
         .with("deal_id", dealId)
         .in(mContentResolver);
@@ -271,14 +255,14 @@ public class BasicFakingTest {
     assertThat(dealContact.contactId).isEqualTo(contactId);
     assertThat(dealContact.dealId).isEqualTo(dealId);
 
-    verify(mContentResolver, never()).insert(eq(CONTACT.getUri()), any(ContentValues.class));
-    verify(mContentResolver, never()).insert(eq(DEAL.getUri()), any(ContentValues.class));
+    verify(mContentResolver, never()).insert(Matchers.eq(TestModels.CONTACT.getUri()), any(ContentValues.class));
+    verify(mContentResolver, never()).insert(Matchers.eq(TestModels.DEAL.getUri()), any(ContentValues.class));
   }
 
   @Test
   public void shouldCreateObjectForPartiallySatisfiedDependenciesOfManyToManyRelationship() throws Exception {
     long dealId = 42L;
-    DealContact dealContact = mTestSubject.iNeed(DealContact.class)
+    TestModels.DealContact dealContact = mTestSubject.iNeed(TestModels.DealContact.class)
         .with("deal_id", dealId)
         .in(mContentResolver);
 
@@ -286,7 +270,7 @@ public class BasicFakingTest {
     assertThat(dealContact.contactId).isNotEqualTo(0);
     assertThat(dealContact.dealId).isEqualTo(dealId);
 
-    verify(mContentResolver, never()).insert(eq(DEAL.getUri()), any(ContentValues.class));
+    verify(mContentResolver, never()).insert(Matchers.eq(TestModels.DEAL.getUri()), any(ContentValues.class));
   }
 
   @Test
@@ -294,7 +278,7 @@ public class BasicFakingTest {
     String notableType = "Contact";
     long notableId = 42L;
 
-    Note note = mTestSubject.iNeed(Note.class)
+    TestModels.Note note = mTestSubject.iNeed(TestModels.Note.class)
         .with("notable_type", notableType)
         .with("notable_id", notableId)
         .in(mContentResolver);
@@ -303,24 +287,24 @@ public class BasicFakingTest {
     assertThat(note.notableType).isEqualTo(notableType);
     assertThat(note.notableId).isEqualTo(notableId);
 
-    verify(mContentResolver, never()).insert(eq(CONTACT.getUri()), any(ContentValues.class));
-    verify(mContentResolver, never()).insert(eq(DEAL.getUri()), any(ContentValues.class));
-    verify(mContentResolver, never()).insert(eq(LEAD.getUri()), any(ContentValues.class));
+    verify(mContentResolver, never()).insert(Matchers.eq(TestModels.CONTACT.getUri()), any(ContentValues.class));
+    verify(mContentResolver, never()).insert(Matchers.eq(TestModels.DEAL.getUri()), any(ContentValues.class));
+    verify(mContentResolver, never()).insert(Matchers.eq(TestModels.LEAD.getUri()), any(ContentValues.class));
   }
 
   @Test(expected = IllegalStateException.class)
   public void shouldNotAllowOverridingOnlyOneColumnInPolymorphicRelationship() throws Exception {
-    mTestSubject.iNeed(Note.class)
+    mTestSubject.iNeed(TestModels.Note.class)
         .with("notable_id", 42L)
         .in(mContentResolver);
   }
 
   @Test
   public void shouldCreateObjectWhenOneSideOfManyToManyRelationshipIsPolymorphic() throws Exception {
-    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
-    Tagging tagging = mTestSubject.iNeed(Tagging.class).relatedTo(contact).in(mContentResolver);
+    TestModels.Tagging tagging = mTestSubject.iNeed(TestModels.Tagging.class).relatedTo(contact).in(mContentResolver);
     assertThat(tagging).isNotNull();
     assertThat(tagging.taggableType).isEqualTo("Contact");
     assertThat(tagging.taggableId).isEqualTo(contact.id);
@@ -330,48 +314,48 @@ public class BasicFakingTest {
 
   @Test
   public void shouldSatisfyOneToManyDependenciesFromSuppliedContext() throws Exception {
-    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
-    Forger<TestModel> forgerWithContext = mTestSubject.inContextOf(contact);
+    Forger<TestModels.TestModel> forgerWithContext = mTestSubject.inContextOf(contact);
 
-    Deal deal = forgerWithContext.iNeed(Deal.class).in(mContentResolver);
+    TestModels.Deal deal = forgerWithContext.iNeed(TestModels.Deal.class).in(mContentResolver);
     assertThat(deal).isNotNull();
     assertThat(deal.contactId).isEqualTo(contact.id);
   }
 
   @Test
   public void shouldSatisfyOneToOneDependenciesFromSuppliedContext() throws Exception {
-    Lead lead = mTestSubject.iNeed(Lead.class).in(mContentResolver);
+    TestModels.Lead lead = mTestSubject.iNeed(TestModels.Lead.class).in(mContentResolver);
     assertThat(lead).isNotNull();
 
-    Forger<TestModel> forgerWithContext = mTestSubject.inContextOf(lead);
+    Forger<TestModels.TestModel> forgerWithContext = mTestSubject.inContextOf(lead);
 
-    ContactData contactData = forgerWithContext.iNeed(ContactData.class).in(mContentResolver);
+    TestModels.ContactData contactData = forgerWithContext.iNeed(TestModels.ContactData.class).in(mContentResolver);
     assertThat(contactData).isNotNull();
     assertThat(contactData.leadId).isEqualTo(lead.id);
   }
 
   @Test
   public void shouldSatisfyRecursiveDependenciesFromSuppliedContext() throws Exception {
-    Contact company = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact company = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(company).isNotNull();
 
-    Forger<TestModel> forgerWithContext = mTestSubject.inContextOf(company);
+    Forger<TestModels.TestModel> forgerWithContext = mTestSubject.inContextOf(company);
 
-    Contact contact = forgerWithContext.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact contact = forgerWithContext.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
     assertThat(contact.contactId).isEqualTo(company.id);
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void shouldNotSatisfyPolymorphicDependenciesFromSuppliedContext() throws Exception {
-    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
-    Forger<TestModel> forgerWithContext = mTestSubject.inContextOf(contact);
+    Forger<TestModels.TestModel> forgerWithContext = mTestSubject.inContextOf(contact);
 
-    forgerWithContext.iNeed(Note.class).in(mContentResolver);
+    forgerWithContext.iNeed(TestModels.Note.class).in(mContentResolver);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -381,27 +365,27 @@ public class BasicFakingTest {
 
   @Test
   public void originalForgerShouldNotUseContext() throws Exception {
-    Contact contact = mTestSubject.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
     mTestSubject.inContextOf(contact);
 
-    Deal deal = mTestSubject.iNeed(Deal.class).in(mContentResolver);
+    TestModels.Deal deal = mTestSubject.iNeed(TestModels.Deal.class).in(mContentResolver);
     assertThat(deal).isNotNull();
     assertThat(deal.contactId).isNotEqualTo(contact.id);
   }
 
   @Test
   public void shouldUseTheSuppliedContextInAllRelationships() throws Exception {
-    Forger<TestModel> forgerWithContext = mTestSubject.inContextOf(User.class).in(mContentResolver);
+    Forger<TestModels.TestModel> forgerWithContext = mTestSubject.inContextOf(TestModels.User.class).in(mContentResolver);
 
-    Deal deal = forgerWithContext.iNeed(Deal.class).in(mContentResolver);
+    TestModels.Deal deal = forgerWithContext.iNeed(TestModels.Deal.class).in(mContentResolver);
     assertThat(deal).isNotNull();
 
-    Contact contact = forgerWithContext.iNeed(Contact.class).in(mContentResolver);
+    TestModels.Contact contact = forgerWithContext.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
-    Tagging tagging = forgerWithContext.iNeed(Tagging.class).relatedTo(contact).in(mContentResolver);
+    TestModels.Tagging tagging = forgerWithContext.iNeed(TestModels.Tagging.class).relatedTo(contact).in(mContentResolver);
     assertThat(tagging).isNotNull();
 
     assertThat(contact.userId).isEqualTo(deal.userId);

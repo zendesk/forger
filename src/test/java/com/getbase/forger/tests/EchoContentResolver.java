@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.chalup.forger.tests;
+package com.getbase.forger.tests;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;

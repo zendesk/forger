@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.chalup.forger.tests;
+package com.getbase.forger.tests;
 
-import com.chalup.forger.thneed.ContentResolverModel;
-import com.chalup.forger.thneed.MicroOrmModel;
+import com.getbase.forger.thneed.ContentResolverModel;
+import com.getbase.forger.thneed.MicroOrmModel;
 import com.google.common.collect.ImmutableList;
 
 import org.chalup.microorm.annotations.Column;

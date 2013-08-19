@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package com.chalup.forger.thneed;
+package com.getbase.forger;
 
-import android.net.Uri;
-
-public interface ContentResolverModel {
-  public Uri getUri();
+public interface FakeDataGenerator<T> {
+  T generate();
 }
