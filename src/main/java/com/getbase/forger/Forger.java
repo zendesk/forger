@@ -449,6 +449,8 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
   private void putIntoContentValues(ContentValues values, String key, Object o) {
     if (o == null) {
       values.putNull(key);
+    } else if (o instanceof Boolean) {
+      values.put(key, (Boolean) o);
     } else if (o instanceof Number) {
       values.put(key, ((Number) o).longValue());
     } else {

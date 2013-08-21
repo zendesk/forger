@@ -231,6 +231,17 @@ public class BasicFakingTest {
     assertThat(deal.name).isNull();
   }
 
+  @Test
+  public void shouldAllowOverridingBooleanFields() throws Exception {
+    TestModels.User user = mTestSubject
+        .iNeed(TestModels.User.class)
+        .with("is_admin", true)
+        .in(mContentResolver);
+
+    assertThat(user).isNotNull();
+    assertThat(user.admin).isTrue();
+  }
+
   @Test(expected = IllegalArgumentException.class)
   public void shouldNotAllowOverridingPrimitiveFieldsWithNull() throws Exception {
     TestModels.Deal deal = mTestSubject

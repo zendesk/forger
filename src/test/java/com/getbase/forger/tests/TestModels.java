@@ -50,6 +50,9 @@ public final class TestModels {
   public static class User extends Identifiable {
     @Column("email")
     public String email;
+
+    @Column("is_admin")
+    public boolean admin;
   }
 
   public static class Contact extends Identifiable {
