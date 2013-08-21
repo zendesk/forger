@@ -337,7 +337,17 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
       mContentValues = initializeContentValues();
     }
 
-    public ModelBuilder<T> relatedTo(final Object parentObject) {
+    public ModelBuilder<T> relatedTo(Object... parentObjects) {
+      Preconditions.checkNotNull(parentObjects);
+
+      for (Object parentObject : parentObjects) {
+        satisfyDependencyWith(parentObject);
+      }
+
+      return this;
+    }
+
+    private void satisfyDependencyWith(final Object parentObject) {
       Preconditions.checkNotNull(parentObject);
 
       Collection<Dependency> dependencies = Collections2.filter(mDependencies.get(mKlass), new Predicate<Dependency>() {
@@ -356,8 +366,6 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
       default:
         throw new IllegalStateException();
       }
-
-      return this;
     }
 
     public ModelBuilder<T> with(String key, Object value) {

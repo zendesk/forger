@@ -140,8 +140,7 @@ public class BasicFakingTest {
 
     TestModels.DealContact dealContact = mTestSubject
         .iNeed(TestModels.DealContact.class)
-        .relatedTo(contact)
-        .relatedTo(deal)
+        .relatedTo(contact, deal)
         .in(mContentResolver);
     assertThat(dealContact).isNotNull();
     assertThat(dealContact.contactId).isEqualTo(contact.id);
