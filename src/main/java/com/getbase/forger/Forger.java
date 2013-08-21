@@ -30,6 +30,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 import org.chalup.microorm.MicroOrm;
 import org.chalup.microorm.annotations.Column;
@@ -53,6 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
@@ -324,6 +326,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     private final TModel mModel;
     private final Class<T> mKlass;
     private ContentValues mContentValues;
+    private Set<String> mPrimitiveColumns = Sets.newHashSet();
 
     private ModelBuilder(Class<T> klass) {
       mKlass = klass;
@@ -358,6 +361,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     }
 
     public ModelBuilder<T> with(String key, Object value) {
+      Preconditions.checkArgument(value != null || !mPrimitiveColumns.contains(key), "Cannot override column for primitive field with null");
       putIntoContentValues(mContentValues, key, value);
       return this;
     }
@@ -398,6 +402,10 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
           Column columnAnnotation = field.getAnnotation(Column.class);
           if (columnAnnotation != null) {
+            if (field.getType().isPrimitive()) {
+              mPrimitiveColumns.add(columnAnnotation.value());
+            }
+
             if (!dependenciesColumns.contains(columnAnnotation.value())) {
               Class<?> fieldType = field.getType();
 
@@ -439,7 +447,9 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
   }
 
   private void putIntoContentValues(ContentValues values, String key, Object o) {
-    if (o instanceof Number) {
+    if (o == null) {
+      values.putNull(key);
+    } else if (o instanceof Number) {
       values.put(key, ((Number) o).longValue());
     } else {
       values.put(key, o.toString());

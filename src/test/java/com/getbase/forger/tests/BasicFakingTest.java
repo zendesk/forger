@@ -221,6 +221,25 @@ public class BasicFakingTest {
   }
 
   @Test
+  public void shouldAllowOverridingFieldsWithNull() throws Exception {
+    TestModels.Deal deal = mTestSubject
+        .iNeed(TestModels.Deal.class)
+        .with("name", null)
+        .in(mContentResolver);
+
+    assertThat(deal).isNotNull();
+    assertThat(deal.name).isNull();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldNotAllowOverridingPrimitiveFieldsWithNull() throws Exception {
+    TestModels.Deal deal = mTestSubject
+        .iNeed(TestModels.Deal.class)
+        .with("user_id", null)
+        .in(mContentResolver);
+  }
+
+  @Test
   public void shouldNotTryToSatisfyDependenciesForOverriddenFieldsOfOneToManyRelationship() throws Exception {
     long contactId = 42L;
     TestModels.Deal deal = mTestSubject.iNeed(TestModels.Deal.class).with("contact_id", contactId).in(mContentResolver);

@@ -43,6 +43,8 @@ public final class TestModels {
     public long contactId;
     @Column("user_id")
     public long userId;
+    @Column("name")
+    public String name;
   }
 
   public static class User extends Identifiable {
