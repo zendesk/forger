@@ -53,6 +53,12 @@ public class EchoContentResolver {
         final Object[] args = invocation.getArguments();
         Uri uri = (Uri) args[0];
         ContentValues values = (ContentValues) args[1];
+        for (String key : getKeysOf(values)) {
+          Object value = values.get(key);
+          if (value instanceof Boolean) {
+            values.put(key, ((Boolean)value) ? 1 : 0);
+          }
+        }
 
         Uri result = generateUri(uri);
         storedData.put(result, values);
