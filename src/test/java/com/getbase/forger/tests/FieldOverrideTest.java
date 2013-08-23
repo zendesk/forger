@@ -83,4 +83,11 @@ public class FieldOverrideTest {
         .with("user_id", null)
         .in(mContentResolver);
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldNotAllowOverridingReadonlyFields() throws Exception {
+    mTestSubject
+        .iNeed(TestModels.Deal.class)
+        .with("_id", 1500);
+  }
 }

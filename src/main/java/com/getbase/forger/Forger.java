@@ -367,6 +367,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     private final Class<T> mKlass;
     private ContentValues mContentValues;
     private Set<String> mPrimitiveColumns = Sets.newHashSet();
+    private Set<String> mReadonlyColumns = Sets.newHashSet();
 
     private ModelBuilder(Class<T> klass) {
       mKlass = klass;
@@ -410,6 +411,8 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
     public ModelBuilder<T> with(String key, Object value) {
       Preconditions.checkArgument(value != null || !mPrimitiveColumns.contains(key), "Cannot override column for primitive field with null");
+      Preconditions.checkArgument(!mReadonlyColumns.contains(key), "Cannot override readonly column");
+
       putIntoContentValues(mContentValues, key, value);
       return this;
     }
@@ -452,6 +455,10 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
           if (columnAnnotation != null) {
             if (field.getType().isPrimitive()) {
               mPrimitiveColumns.add(columnAnnotation.value());
+            }
+
+            if (columnAnnotation.readonly()) {
+              mReadonlyColumns.add(columnAnnotation.value());
             }
 
             if (!dependenciesColumns.contains(columnAnnotation.value())) {

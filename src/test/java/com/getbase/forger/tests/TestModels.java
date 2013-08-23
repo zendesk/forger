@@ -26,6 +26,7 @@ import org.chalup.thneed.PolymorphicType;
 
 import android.content.ContentResolver;
 import android.net.Uri;
+import android.provider.BaseColumns;
 
 import java.util.UUID;
 
@@ -34,6 +35,9 @@ public final class TestModels {
   }
 
   public static class Identifiable {
+    @Column(value = BaseColumns._ID, readonly = true)
+    public long _id;
+
     @Column("id")
     public long id;
   }
