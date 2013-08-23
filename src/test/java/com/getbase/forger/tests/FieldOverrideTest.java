@@ -31,7 +31,7 @@ import android.content.ContentResolver;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
-public class BasicFakingTest {
+public class FieldOverrideTest {
 
   Forger<TestModels.TestModel> mTestSubject;
   ContentResolver mContentResolver;
@@ -42,41 +42,45 @@ public class BasicFakingTest {
     mContentResolver = EchoContentResolver.get();
   }
 
-  public static class ClassOutsideOfTheModelGraph {
-  }
+  @Test
+  public void shouldAllowOverridingFieldsInSimpleObjects() throws Exception {
+    String email = "test@getbase.com";
+    TestModels.User user = mTestSubject
+        .iNeed(TestModels.User.class)
+        .with("email", email)
+        .in(mContentResolver);
 
-  @Test(expected = NullPointerException.class)
-  public void shouldNotAllowFakingClassesOutsideOfModelGraph() throws Exception {
-    mTestSubject.iNeed(ClassOutsideOfTheModelGraph.class).in(mContentResolver);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void shouldNotAllowCreatingClassWithoutDefaultConstructor() throws Exception {
-    mTestSubject.iNeed(TestModels.ClassWithoutDefaultConstructor.class).in(mContentResolver);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void shouldNotAllowCreatingClassWithoutPublicDefaultConstructor() throws Exception {
-    mTestSubject.iNeed(TestModels.ClassWithoutPublicDefaultConstructor.class).in(mContentResolver);
+    assertThat(user).isNotNull();
+    assertThat(user.email).isEqualTo(email);
   }
 
   @Test
-  public void shouldCreateSimpleObject() throws Exception {
-    TestModels.User user = mTestSubject.iNeed(TestModels.User.class).in(mContentResolver);
+  public void shouldAllowOverridingFieldsWithNull() throws Exception {
+    TestModels.Deal deal = mTestSubject
+        .iNeed(TestModels.Deal.class)
+        .with("name", null)
+        .in(mContentResolver);
+
+    assertThat(deal).isNotNull();
+    assertThat(deal.name).isNull();
+  }
+
+  @Test
+  public void shouldAllowOverridingBooleanFields() throws Exception {
+    TestModels.User user = mTestSubject
+        .iNeed(TestModels.User.class)
+        .with("is_admin", true)
+        .in(mContentResolver);
 
     assertThat(user).isNotNull();
-
-    assertThat(user.id).isNotEqualTo(0);
-    assertThat(user.email).isNotNull();
+    assertThat(user.admin).isTrue();
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void shouldRejectIncorrectParentObject() throws Exception {
-    mTestSubject.iNeed(TestModels.Deal.class).relatedTo(new Object());
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void shouldNotAllowCreatingClassWithNonBasicMemberTypes() throws Exception {
-    mTestSubject.iNeed(TestModels.ClassWithNonBasicFieldType.class).in(mContentResolver);
+  public void shouldNotAllowOverridingPrimitiveFieldsWithNull() throws Exception {
+    TestModels.Deal deal = mTestSubject
+        .iNeed(TestModels.Deal.class)
+        .with("user_id", null)
+        .in(mContentResolver);
   }
 }
