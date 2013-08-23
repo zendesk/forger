@@ -36,6 +36,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
+import android.provider.BaseColumns;
 
 import java.util.Collection;
 import java.util.Map;
@@ -61,6 +62,8 @@ public class EchoContentResolver {
         }
 
         Uri result = generateUri(uri);
+        values.put(BaseColumns._ID, sId);
+
         storedData.put(result, values);
         return result;
       }
