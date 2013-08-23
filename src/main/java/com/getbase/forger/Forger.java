@@ -51,11 +51,9 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -352,24 +350,24 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     HashMap<Class<?>, Object> contextCopy = Maps.newLinkedHashMap(mContext);
     contextCopy.put(o.getClass(), o);
 
-    return new Forger(this, contextCopy);
+    return new Forger<TModel>(this, contextCopy);
   }
 
-  public ContextBuilder inContextOf(Class<?> klass) {
+  public <TContext> ContextBuilder<TContext> inContextOf(Class<TContext> klass) {
     Preconditions.checkArgument(mModels.containsKey(klass), "Cannot create faking context for " + klass.getName() + ", because it's not a part of ModelGraph.");
 
-    return new ContextBuilder(klass);
+    return new ContextBuilder<TContext>(klass);
   }
 
-  public class ContextBuilder {
-    private final Class<?> mKlass;
+  public class ContextBuilder<TContext> {
+    private final ModelBuilder<TContext> mBuilder;
 
-    private ContextBuilder(Class<?> klass) {
-      mKlass = klass;
+    private ContextBuilder(Class<TContext> klass) {
+      mBuilder = iNeed(klass);
     }
 
     public Forger<TModel> in(ContentResolver resolver) {
-      return inContextOf(iNeed(mKlass).in(resolver));
+      return inContextOf(mBuilder.in(resolver));
     }
   }
 
