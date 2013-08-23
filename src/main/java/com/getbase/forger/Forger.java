@@ -356,6 +356,8 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
   }
 
   public ContextBuilder inContextOf(Class<?> klass) {
+    Preconditions.checkArgument(mModels.containsKey(klass), "Cannot create faking context for " + klass.getName() + ", because it's not a part of ModelGraph.");
+
     return new ContextBuilder(klass);
   }
 
