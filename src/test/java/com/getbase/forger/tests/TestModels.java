@@ -40,6 +40,9 @@ public final class TestModels {
 
     @Column("id")
     public long id;
+
+    @Column(value = "updated_at", treatNullAsDefault = true)
+    public String updated_at;
   }
 
   public static class Deal extends BaseModel {

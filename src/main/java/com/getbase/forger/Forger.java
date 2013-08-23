@@ -462,10 +462,12 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
             }
 
             if (!dependenciesColumns.contains(columnAnnotation.value())) {
-              Class<?> fieldType = field.getType();
+              if (!columnAnnotation.treatNullAsDefault()) {
+                Class<?> fieldType = field.getType();
 
-              Preconditions.checkArgument(mGenerators.containsKey(fieldType), "Forger doesn't know how to fake the " + fieldType.getName());
-              field.set(fake, mGenerators.get(fieldType).generate());
+                Preconditions.checkArgument(mGenerators.containsKey(fieldType), "Forger doesn't know how to fake the " + fieldType.getName());
+                field.set(fake, mGenerators.get(fieldType).generate());
+              }
             }
           }
 

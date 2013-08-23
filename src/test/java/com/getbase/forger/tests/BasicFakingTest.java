@@ -79,4 +79,13 @@ public class BasicFakingTest {
   public void shouldNotAllowCreatingClassWithNonBasicMemberTypes() throws Exception {
     mTestSubject.iNeed(TestModels.ClassWithNonBasicFieldType.class).in(mContentResolver);
   }
+
+  @Test
+  public void shouldNotGenerateFakeValuesForFieldsWithTreatNullAsDefaultMarker() throws Exception {
+    TestModels.User user = mTestSubject.iNeed(TestModels.User.class).in(mContentResolver);
+
+    assertThat(user).isNotNull();
+
+    assertThat(user.updated_at).isEqualTo("now");
+  }
 }
