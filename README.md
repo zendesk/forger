@@ -75,8 +75,7 @@ Block block = forger.iNeed(Block.class).in(myContentResolver);
 
 // create an object related to specific objects
 Session session = forger.iNeed(Session.class)
-  .relatedTo(room)
-  .relatedTo(block)
+  .relatedTo(room, block)
   .in(myContentResolver);
 
 assertThat(session.room_id).isEqualTo(room.id);
