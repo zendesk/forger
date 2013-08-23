@@ -34,7 +34,7 @@ public final class TestModels {
   private TestModels() {
   }
 
-  public static class Identifiable {
+  public static class BaseModel {
     @Column(value = BaseColumns._ID, readonly = true)
     public long _id;
 
@@ -42,7 +42,7 @@ public final class TestModels {
     public long id;
   }
 
-  public static class Deal extends Identifiable {
+  public static class Deal extends BaseModel {
     @Column("contact_id")
     public long contactId;
     @Column("user_id")
@@ -51,7 +51,7 @@ public final class TestModels {
     public String name;
   }
 
-  public static class User extends Identifiable {
+  public static class User extends BaseModel {
     @Column("email")
     public String email;
 
@@ -59,7 +59,7 @@ public final class TestModels {
     public boolean admin;
   }
 
-  public static class Contact extends Identifiable {
+  public static class Contact extends BaseModel {
     @Column("contact_id")
     public Long contactId;
 
@@ -67,15 +67,15 @@ public final class TestModels {
     public long userId;
   }
 
-  public static class Lead extends Identifiable {
+  public static class Lead extends BaseModel {
   }
 
-  public static class ContactData extends Identifiable {
+  public static class ContactData extends BaseModel {
     @Column("lead_id")
     public long leadId;
   }
 
-  public static class DealContact extends Identifiable {
+  public static class DealContact extends BaseModel {
     @Column("contact_id")
     public long contactId;
 
@@ -83,7 +83,7 @@ public final class TestModels {
     public long dealId;
   }
 
-  public static class Note extends Identifiable {
+  public static class Note extends BaseModel {
     @Column("notable_type")
     public String notableType;
 
@@ -91,7 +91,7 @@ public final class TestModels {
     public long notableId;
   }
 
-  public static class Call extends Identifiable {
+  public static class Call extends BaseModel {
     @Column("callable_type")
     public String callableType;
 
@@ -99,12 +99,12 @@ public final class TestModels {
     public long callableId;
   }
 
-  public static class Tag extends Identifiable {
+  public static class Tag extends BaseModel {
     @Column("value")
     public String value;
   }
 
-  public static class Tagging extends Identifiable {
+  public static class Tagging extends BaseModel {
     @Column("taggable_type")
     public String taggableType;
 
@@ -118,17 +118,17 @@ public final class TestModels {
     public long userId;
   }
 
-  public static class ClassWithoutDefaultConstructor extends Identifiable {
+  public static class ClassWithoutDefaultConstructor extends BaseModel {
     public ClassWithoutDefaultConstructor(Object unused) {
     }
   }
 
-  public static class ClassWithoutPublicDefaultConstructor extends Identifiable {
+  public static class ClassWithoutPublicDefaultConstructor extends BaseModel {
     private ClassWithoutPublicDefaultConstructor() {
     }
   }
 
-  public static class ClassWithNonBasicFieldType extends Identifiable {
+  public static class ClassWithNonBasicFieldType extends BaseModel {
     @Column("uuid")
     public UUID uuid;
   }
