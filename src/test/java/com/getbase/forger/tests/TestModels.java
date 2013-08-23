@@ -181,13 +181,14 @@ public final class TestModels {
   public static TestModel TAGGING = new BaseTestModel(Tagging.class);
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
+      .identifiedByDefault().by("id")
       .with(new BaseTestModel(ClassWithoutDefaultConstructor.class))
       .with(new BaseTestModel(ClassWithoutPublicDefaultConstructor.class))
       .with(new BaseTestModel(ClassWithNonBasicFieldType.class))
       .with(USER)
       .where()
       .the(DEAL).references(CONTACT).by("contact_id")
-      .the(CONTACT_DATA).isPartOf(LEAD).identified().by("lead_id")
+      .the(LEAD).mayHave(CONTACT_DATA).linked().by("lead_id")
       .the(DEAL_CONTACT).links(DEAL).by("deal_id").with(CONTACT).by("contact_id")
       .the(NOTE).references(ImmutableList.of(CONTACT, DEAL, LEAD)).by("notable_type", "notable_id")
       .the(CALL).references(ImmutableList.of(CONTACT, LEAD)).by("callable_type", "callable_id")

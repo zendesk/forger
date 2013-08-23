@@ -20,6 +20,7 @@ import com.getbase.forger.thneed.ContentResolverModel;
 import com.getbase.forger.thneed.MicroOrmModel;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -62,7 +63,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
   private final MicroOrm mMicroOrm;
   private final Map<Class<?>, FakeDataGenerator<?>> mGenerators;
   private final Multimap<Class<?>, Dependency> mDependencies;
-  private final Map<Class<?>, IdGetter> mIdGetters;
+  private final Map<IdColumnKey, IdGetter> mIdGetters;
   private final Map<Class<?>, Object> mContext;
 
   private Forger(Forger<TModel> forger, Map<Class<?>, Object> context) {
@@ -89,8 +90,65 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     this(modelGraph, microOrm, getDefaultGenerators());
   }
 
+  private static class IdColumnKey {
+    private final Class<?> mClass;
+    private final String mColumn;
+
+    private IdColumnKey(Class<?> klass, String column) {
+      Preconditions.checkNotNull(klass);
+      Preconditions.checkNotNull(column);
+
+      mClass = klass;
+      mColumn = column;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      IdColumnKey that = (IdColumnKey) o;
+
+      if (!mClass.equals(that.mClass)) return false;
+      if (!mColumn.equals(that.mColumn)) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(mClass, mColumn);
+    }
+  }
+
   private interface IdGetter {
     Object getId(Object o);
+  }
+
+  private IdGetter createIdGetter(final IdColumnKey idColumnKey) {
+    for (final Field field : Fields.allFieldsIncludingPrivateAndSuper(idColumnKey.mClass)) {
+
+      Column columnAnnotation = field.getAnnotation(Column.class);
+      if (columnAnnotation != null && columnAnnotation.value().equals(idColumnKey.mColumn)) {
+        return new IdGetter() {
+
+          @Override
+          public Object getId(Object o) {
+            boolean wasAccessible = field.isAccessible();
+            try {
+              field.setAccessible(true);
+              return field.get(o);
+            } catch (IllegalAccessException e) {
+              throw new IllegalArgumentException("Forger cannot access " + idColumnKey.mColumn + " column in " + o, e);
+            } finally {
+              field.setAccessible(wasAccessible);
+            }
+          }
+        };
+      }
+    }
+
+    throw new IllegalArgumentException("Forger cannot create id getter in " + idColumnKey.mClass + ". Make sure that this class has a field annotated with @Column('" + idColumnKey.mColumn + "').");
   }
 
   private Forger(ModelGraph<TModel> modelGraph, MicroOrm microOrm, Map<Class<?>, FakeDataGenerator<?>> generators) {
@@ -107,39 +165,21 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
         Class<?> modelClass = model.getModelClass();
 
         mModels.put(modelClass, model);
-        mIdGetters.put(modelClass, createIdGetter(modelClass));
-      }
-
-      private IdGetter createIdGetter(Class<?> klass) {
-        for (final Field field : Fields.allFieldsIncludingPrivateAndSuper(klass)) {
-
-          Column columnAnnotation = field.getAnnotation(Column.class);
-          if (columnAnnotation != null && columnAnnotation.value().equals("id")) {
-            return new IdGetter() {
-
-              @Override
-              public Object getId(Object o) {
-                boolean wasAccessible = field.isAccessible();
-                try {
-                  field.setAccessible(true);
-                  return field.get(o);
-                } catch (IllegalAccessException e) {
-                  throw new IllegalArgumentException("Forger cannot access 'id' column in " + o, e);
-                } finally {
-                  field.setAccessible(wasAccessible);
-                }
-              }
-            };
-          }
-        }
-
-        throw new IllegalArgumentException("Forger cannot create id getter in " + klass.getName() + ". Make sure that this class has a field annotated with @Column('id').");
       }
     });
 
     modelGraph.accept(new RelationshipVisitor<TModel>() {
-      private Object getId(Object o) {
-        return mIdGetters.get(o.getClass()).getId(o);
+      private Object getId(Object o, String idColumn) {
+        IdColumnKey idColumnKey = new IdColumnKey(o.getClass(), idColumn);
+
+        final IdGetter idGetter;
+        if (mIdGetters.containsKey(idColumnKey)) {
+          idGetter = mIdGetters.get(idColumnKey);
+        } else {
+          idGetter = createIdGetter(idColumnKey);
+          mIdGetters.put(idColumnKey, idGetter);
+        }
+        return idGetter.getId(o);
       }
 
       @Override
@@ -159,7 +199,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWith(ContentValues contentValues, Object o) {
-            putIntoContentValues(contentValues, relationship.mLinkedByColumn, getId(o));
+            putIntoContentValues(contentValues, relationship.mLinkedByColumn, getId(o, relationship.mReferencedModelIdColumn));
           }
 
           @Override
@@ -178,12 +218,12 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
       @Override
       public void visit(final OneToOneRelationship<? extends TModel> relationship) {
-        TModel model = relationship.mModel;
-        mDependencies.put(model.getModelClass(), new Dependency<TModel>() {
+        TModel linkedModel = relationship.mLinkedModel;
+        mDependencies.put(linkedModel.getModelClass(), new Dependency<TModel>() {
           @Override
           public boolean canBeSatisfiedWith(Class<?> klass) {
-            TModel parentModel = relationship.mParentModel;
-            return parentModel.getModelClass().equals(klass);
+            TModel model = relationship.mModel;
+            return model.getModelClass().equals(klass);
           }
 
           @Override
@@ -193,13 +233,13 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWith(ContentValues contentValues, Object o) {
-            putIntoContentValues(contentValues, relationship.mLinkedByColumn, getId(o));
+            putIntoContentValues(contentValues, relationship.mLinkedByColumn, getId(o, relationship.mParentModelIdColumn));
           }
 
           @Override
           public void satisfyDependencyWithNewObject(ContentValues contentValues, Forger<TModel> forger, ContentResolver resolver) {
-            TModel referencedModel = relationship.mParentModel;
-            Class<?> modelClass = referencedModel.getModelClass();
+            TModel model = relationship.mModel;
+            Class<?> modelClass = model.getModelClass();
 
             if (forger.mContext.containsKey(modelClass)) {
               satisfyDependencyWith(contentValues, forger.mContext.get(modelClass));
@@ -227,7 +267,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWith(ContentValues contentValues, Object o) {
-            putIntoContentValues(contentValues, relationship.mGroupByColumn, getId(o));
+            putIntoContentValues(contentValues, relationship.mGroupByColumn, getId(o, relationship.mModelIdColumn));
           }
 
           @Override
@@ -276,7 +316,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
               TModel model = type.getModel();
               if (model.getModelClass().equals(o.getClass())) {
                 contentValues.put(relationship.mTypeColumnName, type.getModelName());
-                putIntoContentValues(contentValues, relationship.mIdColumnName, getId(o));
+                putIntoContentValues(contentValues, relationship.mIdColumnName, getId(o, relationship.mPolymorphicModelIdColumn));
                 return;
               }
             }
