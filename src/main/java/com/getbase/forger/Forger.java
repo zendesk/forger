@@ -524,7 +524,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     }
   }
 
-  private static final Map<Class<?>, FakeDataGenerator<?>> getDefaultGenerators() {
+  private static Map<Class<?>, FakeDataGenerator<?>> getDefaultGenerators() {
     return ImmutableMap.<Class<?>, FakeDataGenerator<?>>builder()
         .put(String.class, new FakeDataGenerators.StringGenerator())
         .put(short.class, new FakeDataGenerators.ShortGenerator())
