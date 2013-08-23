@@ -92,4 +92,17 @@ public class FakingContextTest {
     assertThat(deal.contactId).isEqualTo(contactB.id);
     assertThat(deal.contactId).isNotEqualTo(contactA.id);
   }
+
+  @Test
+  public void shouldAllowOverridingFieldsWhenDefiningContext() throws Exception {
+    Forger<TestModels.TestModel> forgerWithContext = mTestSubject
+        .inContextOf(TestModels.Contact.class)
+        .with("id", 42)
+        .in(mContentResolver);
+
+    TestModels.Deal deal = forgerWithContext.iNeed(TestModels.Deal.class).in(mContentResolver);
+    assertThat(deal).isNotNull();
+
+    assertThat(deal.contactId).isEqualTo(42);
+  }
 }

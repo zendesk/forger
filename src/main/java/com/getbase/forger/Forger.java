@@ -366,6 +366,11 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
       mBuilder = iNeed(klass);
     }
 
+    public ContextBuilder<TContext> with(String key, Object value) {
+      mBuilder.with(key, value);
+      return this;
+    }
+
     public Forger<TModel> in(ContentResolver resolver) {
       return inContextOf(mBuilder.in(resolver));
     }
