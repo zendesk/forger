@@ -78,10 +78,9 @@ public class FieldOverrideTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldNotAllowOverridingPrimitiveFieldsWithNull() throws Exception {
-    TestModels.Deal deal = mTestSubject
+    mTestSubject
         .iNeed(TestModels.Deal.class)
-        .with("user_id", null)
-        .in(mContentResolver);
+        .with("user_id", null);
   }
 
   @Test(expected = IllegalArgumentException.class)
