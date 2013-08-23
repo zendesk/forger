@@ -51,9 +51,11 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -157,7 +159,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     mGenerators = generators;
     mDependencies = HashMultimap.create();
     mIdGetters = Maps.newHashMap();
-    mContext = Maps.newHashMap();
+    mContext = Maps.newLinkedHashMap();
 
     modelGraph.accept(new ModelVisitor<TModel>() {
       @Override
@@ -326,7 +328,14 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWithNewObject(ContentValues contentValues, Forger<TModel> forger, ContentResolver resolver) {
-            throw new UnsupportedOperationException("Forger cannot automatically satisfy dependency for polymorphic relationship. Please provide object with Forger.relatedTo(Object o).");
+            for (Class<?> klass : Lists.reverse(Lists.newArrayList(forger.mContext.keySet()))) {
+              if (canBeSatisfiedWith(klass)) {
+                satisfyDependencyWith(contentValues, forger.mContext.get(klass));
+                return;
+              }
+            }
+
+            throw new UnsupportedOperationException("Forger cannot automatically satisfy dependency for polymorphic relationship. Please provide object with Forger.relatedTo(Object o) or add the parent object to context using Forger.inContextOf().");
           }
         });
       }
@@ -340,7 +349,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
   public Forger<TModel> inContextOf(Object o) {
     Preconditions.checkArgument(mModels.containsKey(o.getClass()), "Cannot create faking context for " + o.getClass().getName() + ", because it's not a part of ModelGraph.");
 
-    HashMap<Class<?>, Object> contextCopy = Maps.newHashMap(mContext);
+    HashMap<Class<?>, Object> contextCopy = Maps.newLinkedHashMap(mContext);
     contextCopy.put(o.getClass(), o);
 
     return new Forger(this, contextCopy);

@@ -100,13 +100,28 @@ public class PolymorphicRelationshipsFakingTest {
         .in(mContentResolver);
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void shouldNotSatisfyPolymorphicDependenciesFromSuppliedContext() throws Exception {
+  @Test
+  public void shouldSatisfyPolymorphicDependenciesFromSuppliedContext() throws Exception {
     TestModels.Contact contact = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
     assertThat(contact).isNotNull();
 
     Forger<TestModels.TestModel> forgerWithContext = mTestSubject.inContextOf(contact);
 
-    forgerWithContext.iNeed(TestModels.Note.class).in(mContentResolver);
+    TestModels.Note note = forgerWithContext.iNeed(TestModels.Note.class).in(mContentResolver);
+    assertThat(note).isNotNull();
+    assertThat(note.notableId).isEqualTo(contact.id);
+    assertThat(note.notableType).isEqualTo("Contact");
+  }
+
+  @Test
+  public void shouldUseTheLatestContextObjectToSatisfyPolymorphicDependenciesFromSuppliedContext() throws Exception {
+    Forger<TestModels.TestModel> forgerWithContext = mTestSubject
+        .inContextOf(TestModels.Contact.class).in(mContentResolver)
+        .inContextOf(TestModels.Deal.class).in(mContentResolver);
+
+    TestModels.Note note = forgerWithContext.iNeed(TestModels.Note.class).in(mContentResolver);
+    assertThat(note).isNotNull();
+
+    assertThat(note.notableType).isEqualTo("Deal");
   }
 }
