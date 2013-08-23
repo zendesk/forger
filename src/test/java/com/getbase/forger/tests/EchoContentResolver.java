@@ -64,6 +64,10 @@ public class EchoContentResolver {
         Uri result = generateUri(uri);
         values.put(BaseColumns._ID, sId);
 
+        if (!values.containsKey("updated_at")) {
+          values.put("updated_at", "now");
+        }
+
         storedData.put(result, values);
         return result;
       }
