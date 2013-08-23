@@ -75,4 +75,21 @@ public class FakingContextTest {
     assertThat(contact.userId).isEqualTo(deal.userId);
     assertThat(tagging.userId).isEqualTo(deal.userId);
   }
+
+  @Test
+  public void shouldAllowOverridingCurrentContextWithAnotherObject() throws Exception {
+    TestModels.Contact contactA = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
+    assertThat(contactA).isNotNull();
+
+    TestModels.Contact contactB = mTestSubject.iNeed(TestModels.Contact.class).in(mContentResolver);
+    assertThat(contactB).isNotNull();
+
+    Forger<TestModels.TestModel> forgerWithContext = mTestSubject.inContextOf(contactA).inContextOf(contactB);
+
+    TestModels.Deal deal = forgerWithContext.iNeed(TestModels.Deal.class).in(mContentResolver);
+    assertThat(deal).isNotNull();
+
+    assertThat(deal.contactId).isEqualTo(contactB.id);
+    assertThat(deal.contactId).isNotEqualTo(contactA.id);
+  }
 }
