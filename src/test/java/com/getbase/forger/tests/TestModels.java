@@ -157,7 +157,7 @@ public final class TestModels {
     }
   }
 
-  public static class PolyModel extends BaseTestModel implements PolymorphicType<TestModel, PolyModel> {
+  public static class PolyModel extends BaseTestModel implements PolymorphicType<PolyModel> {
     private final String mModelName;
 
     public PolyModel(Class<?> klass, String modelName) {
@@ -166,7 +166,7 @@ public final class TestModels {
     }
 
     @Override
-    public PolyModel getModel() {
+    public PolyModel self() {
       return this;
     }
 

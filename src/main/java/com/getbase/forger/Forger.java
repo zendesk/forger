@@ -295,7 +295,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
         mDependencies.put(model.getModelClass(), new Dependency<TModel>() {
           @Override
           public boolean canBeSatisfiedWith(Class<?> klass) {
-            for (TModel model : relationship.getPolymorphicModels()) {
+            for (TModel model : relationship.mPolymorphicModels.values()) {
               if (model.getModelClass().equals(klass)) {
                 return true;
               }
@@ -311,11 +311,10 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWith(ContentValues contentValues, Object o) {
-            ImmutableList<? extends PolymorphicType<? extends TModel, ? extends TModel>> types = relationship.mTypes;
-            for (PolymorphicType<? extends TModel, ? extends TModel> type : types) {
-              TModel model = type.getModel();
+            for (Map.Entry<String,? extends TModel> polymorphicType : relationship.mPolymorphicModels.entrySet()) {
+              TModel model = polymorphicType.getValue();
               if (model.getModelClass().equals(o.getClass())) {
-                contentValues.put(relationship.mTypeColumnName, type.getModelName());
+                contentValues.put(relationship.mTypeColumnName, polymorphicType.getKey());
                 putIntoContentValues(contentValues, relationship.mIdColumnName, getId(o, relationship.mPolymorphicModelIdColumn));
                 return;
               }
