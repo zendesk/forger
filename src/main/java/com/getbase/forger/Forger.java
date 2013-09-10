@@ -60,7 +60,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
   private final Map<Class<?>, TModel> mModels;
   private final MicroOrm mMicroOrm;
   private final Map<Class<?>, FakeDataGenerator<?>> mGenerators;
-  private final Multimap<Class<?>, Dependency> mDependencies;
+  private final Multimap<Class<?>, Dependency<TModel>> mDependencies;
   private final Map<IdColumnKey, IdGetter> mIdGetters;
   private final Map<Class<?>, Object> mContext;
 
@@ -402,9 +402,9 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     private void satisfyDependencyWith(final Object parentObject) {
       Preconditions.checkNotNull(parentObject);
 
-      Collection<Dependency> dependencies = Collections2.filter(mDependencies.get(mKlass), new Predicate<Dependency>() {
+      Collection<Dependency<TModel>> dependencies = Collections2.filter(mDependencies.get(mKlass), new Predicate<Dependency<TModel>>() {
         @Override
-        public boolean apply(Dependency dependency) {
+        public boolean apply(Dependency<TModel> dependency) {
           return dependency.canBeSatisfiedWith(parentObject.getClass());
         }
       });
@@ -429,7 +429,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     }
 
     public T in(ContentResolver resolver) {
-      for (Dependency dependency : mDependencies.get(mKlass)) {
+      for (Dependency<TModel> dependency : mDependencies.get(mKlass)) {
         Collection<String> keysOf = getKeysOf(mContentValues);
         Collection columns = dependency.getColumns();
         if (Collections.disjoint(keysOf, columns)) {
