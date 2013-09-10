@@ -457,8 +457,19 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
         dependenciesColumns.addAll(dependency.getColumns());
       }
 
+      fillFake(mKlass, fake, dependenciesColumns);
+
+      ContentValues values = mMicroOrm.toContentValues(fake);
+      for (String column : dependenciesColumns) {
+        values.remove(column);
+      }
+
+      return values;
+    }
+
+    private void fillFake(Class<?> klass, Object fake, Collection<String> dependenciesColumns) {
       try {
-        for (Field field : Fields.allFieldsIncludingPrivateAndSuper(mKlass)) {
+        for (Field field : Fields.allFieldsIncludingPrivateAndSuper(klass)) {
           boolean wasAccessible = field.isAccessible();
           field.setAccessible(true);
 
@@ -485,15 +496,8 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
           field.setAccessible(wasAccessible);
         }
       } catch (IllegalAccessException e) {
-        throw new IllegalArgumentException("Forger cannot initialize fields in " + mKlass.getSimpleName() + ".", e);
+        throw new IllegalArgumentException("Forger cannot initialize fields in " + klass.getSimpleName() + ".", e);
       }
-
-      ContentValues values = mMicroOrm.toContentValues(fake);
-      for (String column : dependenciesColumns) {
-        values.remove(column);
-      }
-
-      return values;
     }
 
     private <T> T instantiateFake(Class<T> klass) {
