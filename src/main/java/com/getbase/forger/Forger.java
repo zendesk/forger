@@ -25,7 +25,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -41,7 +40,6 @@ import org.chalup.thneed.ModelVisitor;
 import org.chalup.thneed.OneToManyRelationship;
 import org.chalup.thneed.OneToOneRelationship;
 import org.chalup.thneed.PolymorphicRelationship;
-import org.chalup.thneed.PolymorphicType;
 import org.chalup.thneed.RecursiveModelRelationship;
 import org.chalup.thneed.RelationshipVisitor;
 
@@ -311,7 +309,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
           @Override
           public void satisfyDependencyWith(ContentValues contentValues, Object o) {
-            for (Map.Entry<String,? extends TModel> polymorphicType : relationship.mPolymorphicModels.entrySet()) {
+            for (Map.Entry<String, ? extends TModel> polymorphicType : relationship.mPolymorphicModels.entrySet()) {
               TModel model = polymorphicType.getValue();
               if (model.getModelClass().equals(o.getClass())) {
                 contentValues.put(relationship.mTypeColumnName, polymorphicType.getKey());

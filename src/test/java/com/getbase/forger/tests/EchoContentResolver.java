@@ -57,7 +57,7 @@ public class EchoContentResolver {
         for (String key : getKeysOf(values)) {
           Object value = values.get(key);
           if (value instanceof Boolean) {
-            values.put(key, ((Boolean)value) ? 1 : 0);
+            values.put(key, ((Boolean) value) ? 1 : 0);
           }
         }
 
