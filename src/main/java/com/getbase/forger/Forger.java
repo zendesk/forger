@@ -450,7 +450,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     }
 
     private ContentValues initializeContentValues() {
-      T fake = instantiateFake();
+      T fake = instantiateFake(mKlass);
 
       Collection<String> dependenciesColumns = Lists.newArrayList();
       for (Dependency<?> dependency : mDependencies.get(mKlass)) {
@@ -496,11 +496,11 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
       return values;
     }
 
-    private T instantiateFake() {
+    private <T> T instantiateFake(Class<T> klass) {
       try {
-        return mKlass.newInstance();
+        return klass.newInstance();
       } catch (Exception e) {
-        throw new IllegalArgumentException("Forger cannot create the " + mKlass.getSimpleName() + ".", e);
+        throw new IllegalArgumentException("Forger cannot create the " + klass.getSimpleName() + ".", e);
       }
     }
   }
