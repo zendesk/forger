@@ -462,8 +462,8 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
           boolean wasAccessible = field.isAccessible();
           field.setAccessible(true);
 
-          Column columnAnnotation = field.getAnnotation(Column.class);
-          if (columnAnnotation != null) {
+          if (field.getAnnotation(Column.class) != null) {
+            Column columnAnnotation = field.getAnnotation(Column.class);
             if (field.getType().isPrimitive()) {
               mPrimitiveColumns.add(columnAnnotation.value());
             }
