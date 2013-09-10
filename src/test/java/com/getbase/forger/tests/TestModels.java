@@ -21,6 +21,7 @@ import com.getbase.forger.thneed.MicroOrmModel;
 import com.google.common.collect.ImmutableList;
 
 import org.chalup.microorm.annotations.Column;
+import org.chalup.microorm.annotations.Embedded;
 import org.chalup.thneed.ModelGraph;
 import org.chalup.thneed.PolymorphicType;
 
@@ -121,6 +122,67 @@ public final class TestModels {
     public long userId;
   }
 
+  public static class SocialInformation {
+    @Column("facebook")
+    public String facebook;
+  }
+
+  public static class PersonalInfo extends BaseModel {
+    @Column("name")
+    public String name;
+
+    @Embedded
+    public SocialInformation socialInformation;
+  }
+
+  public static class ExtendedPersonalInfo extends PersonalInfo {
+    @Column("surname")
+    public String surname;
+  }
+
+  public static class ExtendedSocialInformation extends SocialInformation {
+    @Column("linkedin")
+    public String linkedin;
+  }
+
+  public static class PersonalInfoV2 extends BaseModel {
+    @Column("name")
+    public String name;
+
+    @Embedded
+    public ExtendedSocialInformation socialInformation;
+  }
+
+  public static class PhoneNumber {
+    @Column("extension")
+    public String extension;
+
+    @Column("country_code")
+    public String countryCode;
+
+    @Column("national_number")
+    public String nationalNumber;
+  }
+
+  public static class ContactInfo {
+    @Embedded
+    public PhoneNumber phoneNumber;
+
+    @Column("email")
+    public String email;
+  }
+
+  public static class PersonalInfoV3 extends BaseModel {
+    @Embedded
+    public ContactInfo contactInfo;
+
+    @Column("name")
+    public String name;
+
+    @Embedded
+    public ExtendedSocialInformation socialInformation;
+  }
+
   public static class ClassWithoutDefaultConstructor extends BaseModel {
     public ClassWithoutDefaultConstructor(Object unused) {
     }
@@ -186,6 +248,10 @@ public final class TestModels {
   public static TestModel CALL = new BaseTestModel(Call.class);
   public static TestModel TAG = new BaseTestModel(Tag.class);
   public static TestModel TAGGING = new BaseTestModel(Tagging.class);
+  public static TestModel PERSONAL_INFO = new BaseTestModel(PersonalInfo.class);
+  public static TestModel EXTENDED_PERSONAL_INFO = new BaseTestModel(ExtendedPersonalInfo.class);
+  public static TestModel PERSONAL_INFO_V2 = new BaseTestModel(PersonalInfoV2.class);
+  public static TestModel PERSONAL_INFO_V3 = new BaseTestModel(PersonalInfoV3.class);
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
       .identifiedByDefault().by("id")
@@ -193,6 +259,10 @@ public final class TestModels {
       .with(new BaseTestModel(ClassWithoutPublicDefaultConstructor.class))
       .with(new BaseTestModel(ClassWithNonBasicFieldType.class))
       .with(USER)
+      .with(PERSONAL_INFO)
+      .with(EXTENDED_PERSONAL_INFO)
+      .with(PERSONAL_INFO_V2)
+      .with(PERSONAL_INFO_V3)
       .where()
       .the(DEAL).references(CONTACT).by("contact_id")
       .the(LEAD).mayHave(CONTACT_DATA).linked().by("lead_id")

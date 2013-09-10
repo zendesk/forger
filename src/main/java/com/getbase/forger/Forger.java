@@ -34,6 +34,7 @@ import com.google.common.collect.Sets;
 
 import org.chalup.microorm.MicroOrm;
 import org.chalup.microorm.annotations.Column;
+import org.chalup.microorm.annotations.Embedded;
 import org.chalup.thneed.ManyToManyRelationship;
 import org.chalup.thneed.ModelGraph;
 import org.chalup.thneed.ModelVisitor;
@@ -491,6 +492,10 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
                 field.set(fake, mGenerators.get(fieldType).generate());
               }
             }
+          } else if (field.getAnnotation(Embedded.class) != null) {
+            Object embeddedObject = instantiateFake(field.getType());
+            fillFake(field.getType(), embeddedObject, dependenciesColumns);
+            field.set(fake, embeddedObject);
           }
 
           field.setAccessible(wasAccessible);
