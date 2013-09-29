@@ -238,6 +238,36 @@ public final class TestModels {
     }
   }
 
+  public static class ComplexDate {
+
+    private long mTimestamp;
+
+    public ComplexDate(long timestamp) {
+      mTimestamp = timestamp;
+    }
+
+    public long getTimestamp() {
+      return mTimestamp;
+    }
+  }
+
+  public static class ModelWithComplexDate extends BaseModel {
+
+    @Column("date")
+    private ComplexDate mComplexDate;
+
+    @Column("another_field")
+    private String mAnotherField;
+
+    public ComplexDate getComplexDate() {
+      return mComplexDate;
+    }
+
+    public String getAnotherField() {
+      return mAnotherField;
+    }
+  }
+
   public static PolyModel CONTACT = new PolyModel(Contact.class, "Contact");
   public static PolyModel DEAL = new PolyModel(Deal.class, "Deal");
   public static TestModel USER = new BaseTestModel(User.class);
@@ -252,6 +282,7 @@ public final class TestModels {
   public static TestModel EXTENDED_PERSONAL_INFO = new BaseTestModel(ExtendedPersonalInfo.class);
   public static TestModel PERSONAL_INFO_V2 = new BaseTestModel(PersonalInfoV2.class);
   public static TestModel PERSONAL_INFO_V3 = new BaseTestModel(PersonalInfoV3.class);
+  public static TestModel MODEL_WITH_COMPLEX_DATE = new BaseTestModel(ModelWithComplexDate.class);
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
       .identifiedByDefault().by("id")
@@ -259,6 +290,7 @@ public final class TestModels {
       .with(new BaseTestModel(ClassWithoutPublicDefaultConstructor.class))
       .with(new BaseTestModel(ClassWithNonBasicFieldType.class))
       .with(USER)
+      .with(MODEL_WITH_COMPLEX_DATE)
       .with(PERSONAL_INFO)
       .with(EXTENDED_PERSONAL_INFO)
       .with(PERSONAL_INFO_V2)
