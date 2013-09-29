@@ -95,10 +95,17 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     public Forger<TModel> build() {
       Preconditions.checkState(mModelGraph != null, "ModelGraph is not set");
       Preconditions.checkState(mMicroOrm != null, "MicroOrm is not set");
+      final Map<Class<?>, FakeDataGenerator<?>> filteredDefaults =
+          Maps.filterKeys(getDefaultGenerators(), new Predicate<Class<?>>() {
+            @Override
+            public boolean apply(java.lang.Class<?> clazz) {
+              return !mCustomGenerators.containsKey(clazz);
+            }
+          });
       final ImmutableMap<Class<?>, FakeDataGenerator<?>> generators =
           ImmutableMap.<Class<?>, FakeDataGenerator<?>>builder()
               .putAll(mCustomGenerators)
-              .putAll(getDefaultGenerators())
+              .putAll(filteredDefaults)
               .build();
       return new Forger<TModel>(mModelGraph, mMicroOrm, generators);
     }

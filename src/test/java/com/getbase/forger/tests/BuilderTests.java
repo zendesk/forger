@@ -38,6 +38,25 @@ public class BuilderTests {
     assertThat(date.getAnotherField()).isNotNull();
   }
 
+  @Test
+  public void shouldOverrideDefaultCustomGenerator() throws Exception {
+    final MicroOrm microOrm = new MicroOrm.Builder()
+        .registerTypeAdapter(TestModels.ComplexDate.class, new CustomDateAdapter())
+        .build();
+
+    final Forger<TestModels.TestModel> forger = Forger.<TestModels.TestModel>builder()
+        .withMicroOrm(microOrm)
+        .withModelGraph(TestModels.MODEL_GRAPH)
+        .registerCustomGenerator(TestModels.ComplexDate.class, new CustomDateAdapter())
+        .registerCustomGenerator(String.class, new CustomStringAdapter())
+        .build();
+
+    final TestModels.ModelWithComplexDate date
+        = forger.iNeed(TestModels.ModelWithComplexDate.class).in(EchoContentResolver.get());
+
+    assertThat(date.getAnotherField()).isEqualTo(CustomStringAdapter.CUSTOM_TEXT);
+  }
+
   @Test(expected = IllegalStateException.class)
   public void shouldNotAllowPuttingCustomGeneratorForOneClassTwice() throws Exception {
     Forger.<TestModels.TestModel>builder()
@@ -105,6 +124,16 @@ public class BuilderTests {
     @Override
     public void toContentValues(ContentValues contentValues, String s, TestModels.ComplexDate complexDate) {
       contentValues.put(s, complexDate.getTimestamp());
+    }
+  }
+
+  private static class CustomStringAdapter implements FakeDataGenerator<String> {
+
+    private static final String CUSTOM_TEXT = "Custom text";
+
+    @Override
+    public String generate() {
+      return CUSTOM_TEXT;
     }
   }
 }
