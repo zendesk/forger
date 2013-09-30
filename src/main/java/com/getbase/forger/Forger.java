@@ -58,6 +58,59 @@ import java.util.Set;
 
 public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
 
+  public static <TModel extends ContentResolverModel & MicroOrmModel> Builder<TModel> builder() {
+    return new Builder<TModel>();
+  }
+
+  public static class Builder<TModel extends ContentResolverModel & MicroOrmModel> {
+
+    private ModelGraph<TModel> mModelGraph;
+    private MicroOrm mMicroOrm;
+    private Map<Class<?>, FakeDataGenerator<?>> mCustomGenerators = Maps.newLinkedHashMap();
+
+    private Builder() {
+    }
+
+    public Builder<TModel> withModelGraph(ModelGraph<TModel> modelGraph) {
+      Preconditions.checkState(mModelGraph == null, "You've already set ModelGraph");
+      mModelGraph = modelGraph;
+      return this;
+    }
+
+    public Builder<TModel> withMicroOrm(MicroOrm microOrm) {
+      Preconditions.checkState(mMicroOrm == null, "You've already set ModelGraph");
+      mMicroOrm = microOrm;
+      return this;
+    }
+
+    public <Type> Builder<TModel> registerCustomGenerator(Class<Type> clazz, FakeDataGenerator<Type> generator) {
+      Preconditions.checkArgument(clazz != null, "Passed class can't be null");
+      Preconditions.checkArgument(generator != null, "Passed generator can't be null");
+      Preconditions.checkState(!mCustomGenerators.containsKey(clazz),
+          String.format("You've already registered generator for %s", clazz.getSimpleName()));
+      mCustomGenerators.put(clazz, generator);
+      return this;
+    }
+
+    public Forger<TModel> build() {
+      Preconditions.checkState(mModelGraph != null, "ModelGraph is not set");
+      Preconditions.checkState(mMicroOrm != null, "MicroOrm is not set");
+      final Map<Class<?>, FakeDataGenerator<?>> filteredDefaults =
+          Maps.filterKeys(getDefaultGenerators(), new Predicate<Class<?>>() {
+            @Override
+            public boolean apply(java.lang.Class<?> clazz) {
+              return !mCustomGenerators.containsKey(clazz);
+            }
+          });
+      final ImmutableMap<Class<?>, FakeDataGenerator<?>> generators =
+          ImmutableMap.<Class<?>, FakeDataGenerator<?>>builder()
+              .putAll(mCustomGenerators)
+              .putAll(filteredDefaults)
+              .build();
+      return new Forger<TModel>(mModelGraph, mMicroOrm, generators);
+    }
+  }
+
   private final Map<Class<?>, TModel> mModels;
   private final MicroOrm mMicroOrm;
   private final Map<Class<?>, FakeDataGenerator<?>> mGenerators;
