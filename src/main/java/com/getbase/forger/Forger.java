@@ -53,6 +53,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -391,8 +392,12 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     });
   }
 
-  public <T> ModelBuilder<T> iNeed(Class<T> klass) {
-    return new ModelBuilder<T>(klass);
+  public <T> SingleModelBuilder<T> iNeed(Class<T> klass) {
+    return new SingleModelBuilder<T>(klass);
+  }
+
+  public AmountBuilder iNeed(int amount) {
+    return new AmountBuilder(amount);
   }
 
   public Forger<TModel> inContextOf(Object o) {
@@ -411,7 +416,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
   }
 
   public class ContextBuilder<TContext> {
-    private final ModelBuilder<TContext> mBuilder;
+    private final SingleModelBuilder<TContext> mBuilder;
 
     private ContextBuilder(Class<TContext> klass) {
       mBuilder = iNeed(klass);
@@ -427,15 +432,95 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     }
   }
 
-  public class ModelBuilder<T> {
+  public class AmountBuilder {
+
+    private final int mAmount;
+
+    private AmountBuilder(int amount) {
+      Preconditions.checkArgument(amount > 0, "Passed amount must be greater than 0");
+      mAmount = amount;
+    }
+
+    public <T> ModelBuilder<List<T>, T> of(Class<T> klass) {
+      return new MultiModelBuilder<T>(mAmount, klass);
+    }
+  }
+
+  private interface Insertor<TResult, TModel, T> {
+    TResult insert(ContentResolver resolver, TModel model, Class<T> klass, ContentValues contentValues);
+  }
+
+  private class SingleInsertor<T> implements Insertor<T, TModel, T> {
+
+    @Override
+    public T insert(ContentResolver resolver, TModel model, Class<T> klass, ContentValues contentValues) {
+      ContentValues contentValuesCopy = new ContentValues();
+      contentValuesCopy.putAll(contentValues);
+      for (Dependency<TModel> dependency : mDependencies.get(klass)) {
+        Collection<String> keysOf = getKeysOf(contentValuesCopy);
+        Collection columns = dependency.getColumns();
+        if (Collections.disjoint(keysOf, columns)) {
+          dependency.satisfyDependencyWithNewObject(contentValuesCopy, Forger.this, resolver);
+        } else if (!keysOf.containsAll(columns)) {
+          throw new IllegalStateException("Either override columns [" + Joiner.on(", ").join(columns) + "] using Forger.with(), or satisfy this dependency of " + klass.getSimpleName() + " using Forger.relatedTo().");
+        }
+      }
+      Uri uri = resolver.insert(model.getUri(), contentValuesCopy);
+
+      Cursor c = resolver.query(uri, mMicroOrm.getProjection(klass), null, null, null);
+      if (c != null && c.moveToFirst()) {
+        return mMicroOrm.fromCursor(c, klass);
+      } else {
+        throw new IllegalStateException("ContentResolver returned null or empty Cursor.");
+      }
+    }
+  }
+
+  private class MultiInsertor<T> implements Insertor<List<T>, TModel, T> {
+
+    private final SingleInsertor<T> mSingleInsertor = new SingleInsertor<T>();
+    private final int mAmount;
+
+    private MultiInsertor(int amount) {
+      mAmount = amount;
+    }
+
+    @Override
+    public List<T> insert(ContentResolver resolver, TModel model, Class<T> klass, ContentValues contentValues) {
+      List<T> inserted = Lists.newArrayList();
+      for (int i = 0; i < mAmount; i++) {
+        inserted.add(mSingleInsertor.insert(resolver, model, klass, contentValues));
+      }
+      return inserted;
+    }
+  }
+
+  public class SingleModelBuilder<T> extends ModelBuilder<T, T> {
+
+    private SingleModelBuilder(Class<T> klass) {
+      super(klass, new SingleInsertor<T>());
+    }
+  }
+
+  public class MultiModelBuilder<T> extends ModelBuilder<List<T>, T> {
+
+    private MultiModelBuilder(int amount, Class<T> klass) {
+      super(klass, new MultiInsertor<T>(amount));
+    }
+  }
+
+  public abstract class ModelBuilder<TResult, T> {
+
     private final TModel mModel;
+    private final Insertor<TResult, TModel, T> mInsertor;
     private final Class<T> mKlass;
     private ContentValues mContentValues;
     private Set<String> mPrimitiveColumns = Sets.newHashSet();
     private Set<String> mReadonlyColumns = Sets.newHashSet();
 
-    private ModelBuilder(Class<T> klass) {
+    private ModelBuilder(Class<T> klass, Insertor<TResult, TModel, T> insertor) {
       mKlass = klass;
+      mInsertor = insertor;
 
       mModel = mModels.get(klass);
       Preconditions.checkNotNull(mModel, "Forger cannot create an object of " + klass.getSimpleName() + " from the provided ModelGraph");
@@ -443,7 +528,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
       mContentValues = initializeContentValues();
     }
 
-    public ModelBuilder<T> relatedTo(Object... parentObjects) {
+    public ModelBuilder<TResult, T> relatedTo(Object... parentObjects) {
       Preconditions.checkNotNull(parentObjects);
 
       for (Object parentObject : parentObjects) {
@@ -474,7 +559,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
       }
     }
 
-    public ModelBuilder<T> with(String key, Object value) {
+    public ModelBuilder<TResult, T> with(String key, Object value) {
       Preconditions.checkArgument(value != null || !mPrimitiveColumns.contains(key), "Cannot override column for primitive field with null");
       Preconditions.checkArgument(!mReadonlyColumns.contains(key), "Cannot override readonly column");
 
@@ -482,25 +567,8 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
       return this;
     }
 
-    public T in(ContentResolver resolver) {
-      for (Dependency<TModel> dependency : mDependencies.get(mKlass)) {
-        Collection<String> keysOf = getKeysOf(mContentValues);
-        Collection columns = dependency.getColumns();
-        if (Collections.disjoint(keysOf, columns)) {
-          dependency.satisfyDependencyWithNewObject(mContentValues, Forger.this, resolver);
-        } else if (!keysOf.containsAll(columns)) {
-          throw new IllegalStateException("Either override columns [" + Joiner.on(", ").join(columns) + "] using Forger.with(), or satisfy this dependency of " + mKlass.getSimpleName() + " using Forger.relatedTo().");
-        }
-      }
-
-      Uri uri = resolver.insert(mModel.getUri(), mContentValues);
-
-      Cursor c = resolver.query(uri, mMicroOrm.getProjection(mKlass), null, null, null);
-      if (c != null && c.moveToFirst()) {
-        return mMicroOrm.fromCursor(c, mKlass);
-      } else {
-        throw new IllegalStateException("ContentResolver returned null or empty Cursor.");
-      }
+    public TResult in(ContentResolver resolver) {
+      return mInsertor.insert(resolver, mModel, mKlass, mContentValues);
     }
 
     private ContentValues initializeContentValues() {
