@@ -468,10 +468,16 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
       Uri uri = resolver.insert(model.getUri(), contentValuesCopy);
 
       Cursor c = resolver.query(uri, mMicroOrm.getProjection(klass), null, null, null);
-      if (c != null && c.moveToFirst()) {
-        return mMicroOrm.fromCursor(c, klass);
-      } else {
-        throw new IllegalStateException("ContentResolver returned null or empty Cursor.");
+      try {
+        if (c != null && c.moveToFirst()) {
+          return mMicroOrm.fromCursor(c, klass);
+        } else {
+          throw new IllegalStateException("ContentResolver returned null or empty Cursor.");
+        }
+      } finally {
+        if (c != null && !c.isClosed()) {
+          c.close();
+        }
       }
     }
   }
