@@ -99,18 +99,10 @@ mvn clean package
 ```
 in directory with pom.xml.
 
-Caveats
--------
-
-* Currently the Forger assumes that all data models object are identified by the field annotated with @Column("id").
-* The API is subject to **heavy** change. This is more of a draft of the proof of concept than a production ready library.
-
 Todo
 ----
 
 * Documentation
-* Support for custom ID columns in data models
-* Forger.Builder interface which allows registering the custom FakeDataGenerators
 
 License
 -------
