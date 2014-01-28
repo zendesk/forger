@@ -99,6 +99,10 @@ mvn clean package
 ```
 in directory with pom.xml.
 
+minSdkVersion = 10
+------------------
+Forger is compatible with Android 2.3 and newer.
+
 Todo
 ----
 

@@ -48,7 +48,7 @@ public class GroupFakingTest {
                 return user._id;
               }
             })
-            .toImmutableSet();
+            .toSet();
 
     assertThat(ids).hasSize(20);
   }
@@ -111,7 +111,7 @@ public class GroupFakingTest {
                 return deal.contactId;
               }
             })
-            .toImmutableSet();
+            .toSet();
     assertThat(setOfIds).hasSize(10);
   }
 }
