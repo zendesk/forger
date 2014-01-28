@@ -20,12 +20,12 @@
     <dependency>
       <groupId>org.chalup.microorm</groupId>
       <artifactId>microorm</artifactId>
-      <version>0.3</version>
+      <version>0.4</version>
     </dependency>
     <dependency>
       <groupId>org.chalup.thneed</groupId>
       <artifactId>thneed</artifactId>
-      <version>0.5</version>
+      <version>0.6</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
