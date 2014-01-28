@@ -101,7 +101,7 @@ in directory with pom.xml.
 
 minSdkVersion = 10
 ------------------
-Forger is compatible with Android 2.3 and newer.
+Forger is compatible with Android 2.3 and newer. Of course minSdkVersion for your app can be lower if you are using Forger only for tests.
 
 Todo
 ----
