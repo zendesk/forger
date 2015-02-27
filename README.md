@@ -3,8 +3,8 @@ Forger
 
 Android library for populating the ContentProvider with test data.
 
-Basic usage
------------
+Usage
+=====
 
 The library is tightly coupled with MicroOrm and Thneed projects. You need to annotate your data models fields with MicroOrm's `@Column`:
 ```java
@@ -90,26 +90,8 @@ assertThat(session.block_id).isNotEqualTo(0);
 
 It might look like a lot of boilerplate code, but it still beats writing all helper methods for your tests by hand, especially when the number of data models and connections between them grows to several dozens.
 
-
-Building
---------
-This is standard maven project. To build it just execute:
-```shell
-mvn clean package
-```
-in directory with pom.xml.
-
-minSdkVersion = 10
-------------------
-Forger is compatible with Android 2.3 and newer. Of course minSdkVersion for your app can be lower if you are using Forger only for tests.
-
-Todo
-----
-
-* Documentation
-
 License
--------
+=======
 
     Copyright (C) 2013 Jerzy Chalupski
 
