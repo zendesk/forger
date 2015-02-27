@@ -1,11 +1,9 @@
 Forger
 ======
-
 Android library for populating the ContentProvider with test data.
 
-Usage
-=====
-
+Features
+========
 The library is tightly coupled with MicroOrm and Thneed projects. You need to annotate your data models fields with MicroOrm's `@Column`:
 ```java
 public class BaseModel {
@@ -89,6 +87,16 @@ assertThat(session.block_id).isNotEqualTo(0);
 ```
 
 It might look like a lot of boilerplate code, but it still beats writing all helper methods for your tests by hand, especially when the number of data models and connections between them grows to several dozens.
+
+Usage
+=====
+Just add the dependency to your `build.gradle`:
+
+```groovy
+dependencies {
+    testCompile 'com.getbase.android.forger:forger:0.1'
+}
+```
 
 License
 =======
