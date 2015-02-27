@@ -18,6 +18,6 @@ package com.getbase.android.forger.thneed;
 
 import android.net.Uri;
 
-public interface ContentResolverModel {
+public interface ContentProviderModel {
   public Uri getUri();
 }

@@ -16,7 +16,7 @@
 
 package com.getbase.android.forger.tests;
 
-import com.getbase.android.forger.thneed.ContentResolverModel;
+import com.getbase.android.forger.thneed.ContentProviderModel;
 import com.getbase.android.forger.thneed.PojoModel;
 import com.google.common.collect.ImmutableList;
 
@@ -198,7 +198,7 @@ public final class TestModels {
     public UUID uuid;
   }
 
-  public interface TestModel extends ContentResolverModel, PojoModel {
+  public interface TestModel extends ContentProviderModel, PojoModel {
   }
 
   public static class BaseTestModel implements TestModel {
