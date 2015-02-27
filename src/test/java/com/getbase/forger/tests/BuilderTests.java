@@ -1,7 +1,7 @@
-package com.getbase.forger.tests;
+package com.getbase.android.forger.tests;
 
-import com.getbase.forger.FakeDataGenerator;
-import com.getbase.forger.Forger;
+import com.getbase.android.forger.FakeDataGenerator;
+import com.getbase.android.forger.Forger;
 
 import org.chalup.microorm.MicroOrm;
 import org.chalup.microorm.TypeAdapter;

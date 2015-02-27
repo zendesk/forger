@@ -14,8 +14,22 @@
  * limitations under the License.
  */
 
-package com.getbase.forger.thneed;
+package com.getbase.android.forger;
 
-public interface MicroOrmModel {
-  public Class<?> getModelClass();
+import com.google.common.collect.Lists;
+
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+
+class Fields {
+
+  static List<Field> allFieldsIncludingPrivateAndSuper(Class<?> klass) {
+    List<Field> fields = Lists.newArrayList();
+    while (!klass.equals(Object.class)) {
+      Collections.addAll(fields, klass.getDeclaredFields());
+      klass = klass.getSuperclass();
+    }
+    return fields;
+  }
 }

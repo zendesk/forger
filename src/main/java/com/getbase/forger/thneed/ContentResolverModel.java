@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.getbase.forger.thneed;
+package com.getbase.android.forger.thneed;
 
 import android.net.Uri;
 

@@ -1,8 +1,8 @@
-package com.getbase.forger.tests;
+package com.getbase.android.forger.tests;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import com.getbase.forger.Forger;
+import com.getbase.android.forger.Forger;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;

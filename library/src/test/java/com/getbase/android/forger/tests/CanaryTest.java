@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package com.getbase.forger.thneed;
+package com.getbase.android.forger.tests;
 
-import android.net.Uri;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-public interface ContentResolverModel {
-  public Uri getUri();
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE)
+public class CanaryTest {
+  @Test
+  public void canaryTest() throws Exception {
+  }
 }

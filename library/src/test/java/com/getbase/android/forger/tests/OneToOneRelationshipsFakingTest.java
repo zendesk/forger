@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.getbase.forger.tests;
+package com.getbase.android.forger.tests;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-import com.getbase.forger.Forger;
+import com.getbase.android.forger.Forger;
 
 import org.chalup.microorm.MicroOrm;
 import org.junit.Before;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.getbase.forger;
+package com.getbase.android.forger;
 
 public interface FakeDataGenerator<T> {
   T generate();

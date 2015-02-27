@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.getbase.forger.tests;
+package com.getbase.android.forger.tests;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-import com.getbase.forger.Forger;
-import com.getbase.forger.tests.TestModels.ExtendedPersonalInfo;
-import com.getbase.forger.tests.TestModels.PersonalInfo;
-import com.getbase.forger.tests.TestModels.PersonalInfoV2;
-import com.getbase.forger.tests.TestModels.PersonalInfoV3;
+import com.getbase.android.forger.Forger;
+import com.getbase.android.forger.tests.TestModels.ExtendedPersonalInfo;
+import com.getbase.android.forger.tests.TestModels.PersonalInfo;
+import com.getbase.android.forger.tests.TestModels.PersonalInfoV2;
+import com.getbase.android.forger.tests.TestModels.PersonalInfoV3;
 
 import org.chalup.microorm.MicroOrm;
 import org.junit.Before;

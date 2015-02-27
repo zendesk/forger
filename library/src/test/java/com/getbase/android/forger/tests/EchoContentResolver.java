@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.getbase.forger.tests;
+package com.getbase.android.forger.tests;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;

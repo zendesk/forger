@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.getbase.forger.tests;
+package com.getbase.android.forger.tests;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

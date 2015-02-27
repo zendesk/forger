@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.getbase.forger;
+package com.getbase.android.forger;
 
 import com.google.common.collect.Lists;
 

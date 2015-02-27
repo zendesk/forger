@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.getbase.forger;
+package com.getbase.android.forger;
 
 interface FakeDataGenerators {
   public static class StringGenerator implements FakeDataGenerator<String> {
