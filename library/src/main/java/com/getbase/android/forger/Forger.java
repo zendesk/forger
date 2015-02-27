@@ -17,7 +17,7 @@
 package com.getbase.android.forger;
 
 import com.getbase.android.forger.thneed.ContentResolverModel;
-import com.getbase.android.forger.thneed.MicroOrmModel;
+import com.getbase.android.forger.thneed.PojoModel;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -57,13 +57,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
+public class Forger<TModel extends ContentResolverModel & PojoModel> {
 
-  public static <TModel extends ContentResolverModel & MicroOrmModel> Builder<TModel> builder() {
+  public static <TModel extends ContentResolverModel & PojoModel> Builder<TModel> builder() {
     return new Builder<TModel>();
   }
 
-  public static class Builder<TModel extends ContentResolverModel & MicroOrmModel> {
+  public static class Builder<TModel extends ContentResolverModel & PojoModel> {
 
     private ModelGraph<TModel> mModelGraph;
     private MicroOrm mMicroOrm;
@@ -129,7 +129,7 @@ public class Forger<TModel extends ContentResolverModel & MicroOrmModel> {
     mContext = context;
   }
 
-  private interface Dependency<T extends ContentResolverModel & MicroOrmModel> {
+  private interface Dependency<T extends ContentResolverModel & PojoModel> {
     boolean canBeSatisfiedWith(Class<?> klass);
 
     Collection<String> getColumns();

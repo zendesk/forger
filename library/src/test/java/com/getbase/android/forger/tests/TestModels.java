@@ -17,7 +17,7 @@
 package com.getbase.android.forger.tests;
 
 import com.getbase.android.forger.thneed.ContentResolverModel;
-import com.getbase.android.forger.thneed.MicroOrmModel;
+import com.getbase.android.forger.thneed.PojoModel;
 import com.google.common.collect.ImmutableList;
 
 import org.chalup.microorm.annotations.Column;
@@ -198,7 +198,7 @@ public final class TestModels {
     public UUID uuid;
   }
 
-  public interface TestModel extends ContentResolverModel, MicroOrmModel {
+  public interface TestModel extends ContentResolverModel, PojoModel {
   }
 
   public static class BaseTestModel implements TestModel {

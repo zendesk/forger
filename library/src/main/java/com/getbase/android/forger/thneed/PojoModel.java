@@ -16,6 +16,6 @@
 
 package com.getbase.android.forger.thneed;
 
-public interface MicroOrmModel {
+public interface PojoModel {
   public Class<?> getModelClass();
 }
