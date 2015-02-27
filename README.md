@@ -13,7 +13,7 @@ public class BaseModel {
   public long id;
 }
 
-public class Block extends BaseModel{
+public class Block extends BaseModel {
   @Column(Blocks.BLOCK_TITLE)
   public String title;
 
@@ -48,7 +48,7 @@ public class Session extends BaseModel {
 
 Then you have to define the relationships between your data models using Thneed:
 ```java
-public interface DataModel extends ContentResolverModel, MicroOrmModel {
+public interface DataModel extends ContentProviderModel, PojoModel {
 }
 
 private DataModel ROOM = new DataModel {
