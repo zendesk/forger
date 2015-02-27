@@ -31,8 +31,8 @@ androidUnitTest {
 
 dependencies {
   compile 'com.google.guava:guava:16.0'
-  compile 'org.chalup.microorm:microorm:0.4'
-  compile 'org.chalup.thneed:thneed:0.6'
+  compile 'org.chalup.microorm:microorm:0.5'
+  compile 'org.chalup.thneed:thneed:0.7'
 
   testCompile('junit:junit:4.11') {
     exclude module: 'hamcrest-core'

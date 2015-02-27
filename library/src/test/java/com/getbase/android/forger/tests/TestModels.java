@@ -16,14 +16,14 @@
 
 package com.getbase.android.forger.tests;
 
-import com.getbase.android.forger.thneed.ContentProviderModel;
-import com.getbase.android.forger.thneed.PojoModel;
 import com.google.common.collect.ImmutableList;
 
 import org.chalup.microorm.annotations.Column;
 import org.chalup.microorm.annotations.Embedded;
 import org.chalup.thneed.ModelGraph;
 import org.chalup.thneed.PolymorphicType;
+import org.chalup.thneed.models.ContentProviderModel;
+import org.chalup.thneed.models.PojoModel;
 
 import android.content.ContentResolver;
 import android.net.Uri;

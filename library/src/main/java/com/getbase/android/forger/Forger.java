@@ -16,8 +16,6 @@
 
 package com.getbase.android.forger;
 
-import com.getbase.android.forger.thneed.ContentProviderModel;
-import com.getbase.android.forger.thneed.PojoModel;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -43,6 +41,8 @@ import org.chalup.thneed.OneToOneRelationship;
 import org.chalup.thneed.PolymorphicRelationship;
 import org.chalup.thneed.RecursiveModelRelationship;
 import org.chalup.thneed.RelationshipVisitor;
+import org.chalup.thneed.models.ContentProviderModel;
+import org.chalup.thneed.models.PojoModel;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
