@@ -50,14 +50,18 @@ public class BasicFakingTest {
     mTestSubject.iNeed(ClassOutsideOfTheModelGraph.class).in(mContentResolver);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void shouldNotAllowCreatingClassWithoutDefaultConstructor() throws Exception {
-    mTestSubject.iNeed(TestModels.ClassWithoutDefaultConstructor.class).in(mContentResolver);
+  @Test
+  public void shouldCreateClassWithoutDefaultConstructor() throws Exception {
+    TestModels.ClassWithoutDefaultConstructor object = mTestSubject.iNeed(TestModels.ClassWithoutDefaultConstructor.class).in(mContentResolver);
+
+    assertThat(object).isNotNull();
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void shouldNotAllowCreatingClassWithoutPublicDefaultConstructor() throws Exception {
-    mTestSubject.iNeed(TestModels.ClassWithoutPublicDefaultConstructor.class).in(mContentResolver);
+  @Test
+  public void shouldCreateClassWithoutPublicDefaultConstructor() throws Exception {
+    TestModels.ClassWithoutPublicDefaultConstructor object = mTestSubject.iNeed(TestModels.ClassWithoutPublicDefaultConstructor.class).in(mContentResolver);
+
+    assertThat(object).isNotNull();
   }
 
   @Test
