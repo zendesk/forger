@@ -520,12 +520,14 @@ public class Forger<TModel extends ContentProviderModel & PojoModel> {
     private final TModel mModel;
     private final Insertor<TResult, TModel, T> mInsertor;
     private final Class<T> mKlass;
+    private final ClassFactory<T> mClassFactory;
     private ContentValues mContentValues;
     private Set<String> mPrimitiveColumns = Sets.newHashSet();
     private Set<String> mReadonlyColumns = Sets.newHashSet();
 
     private ModelBuilder(Class<T> klass, Insertor<TResult, TModel, T> insertor) {
       mKlass = klass;
+      mClassFactory = ClassFactory.get(klass);
       mInsertor = insertor;
 
       mModel = mModels.get(klass);
@@ -578,7 +580,7 @@ public class Forger<TModel extends ContentProviderModel & PojoModel> {
     }
 
     private ContentValues initializeContentValues() {
-      T fake = instantiateFake(mKlass);
+      T fake = instantiateFake(mClassFactory);
 
       Collection<String> dependenciesColumns = Lists.newArrayList();
       for (Dependency<?> dependency : mDependencies.get(mKlass)) {
@@ -620,7 +622,8 @@ public class Forger<TModel extends ContentProviderModel & PojoModel> {
               }
             }
           } else if (field.getAnnotation(Embedded.class) != null) {
-            Object embeddedObject = instantiateFake(field.getType());
+            final ClassFactory<Object> classFactory = ClassFactory.get(field.getType());
+            Object embeddedObject = instantiateFake(classFactory);
             fillFake(field.getType(), embeddedObject, dependenciesColumns);
             field.set(fake, embeddedObject);
           }
@@ -632,11 +635,11 @@ public class Forger<TModel extends ContentProviderModel & PojoModel> {
       }
     }
 
-    private <T> T instantiateFake(Class<T> klass) {
+    private <T> T instantiateFake(ClassFactory<T> mClassFactory) {
       try {
-        return klass.newInstance();
+        return mClassFactory.newInstance();
       } catch (Exception e) {
-        throw new IllegalArgumentException("Forger cannot create the " + klass.getSimpleName() + ".", e);
+        throw new IllegalArgumentException("Forger cannot create the " + mClassFactory.getClass().getSimpleName() + ".", e);
       }
     }
   }

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 21
@@ -18,20 +19,9 @@ android {
   }
 }
 
-apply plugin: 'android-unit-test'
-
-androidUnitTest {
-  testTasks {
-    all {
-      jvmArgs '-noverify'
-      jvmArgs '-XX:MaxPermSize=256m'
-    }
-  }
-}
-
 dependencies {
-  compile 'com.google.guava:guava:16.0'
-  compile 'org.chalup.microorm:microorm:0.5'
+  compile 'com.google.guava:guava:18.0'
+  compile 'org.chalup.microorm:microorm:0.7.0'
   compile 'org.chalup.thneed:thneed:0.7'
 
   testCompile('junit:junit:4.11') {
@@ -40,7 +30,9 @@ dependencies {
   testCompile 'org.robolectric:robolectric:2.4'
   testCompile 'org.easytesting:fest-assert-core:2.0M10'
   testCompile 'org.mockito:mockito-all:1.9.5'
-  testCompile 'com.google.android:android:4.1.1.4'
+
+  testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
   compile 'com.android.support:support-annotations:19.1.0'
 }

@@ -19,6 +19,7 @@ package com.getbase.android.forger.tests;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import com.getbase.android.forger.Forger;
+import com.getbase.android.forger.KotlinDataClass;
 
 import org.chalup.microorm.MicroOrm;
 import org.junit.Before;
@@ -50,14 +51,18 @@ public class BasicFakingTest {
     mTestSubject.iNeed(ClassOutsideOfTheModelGraph.class).in(mContentResolver);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void shouldNotAllowCreatingClassWithoutDefaultConstructor() throws Exception {
-    mTestSubject.iNeed(TestModels.ClassWithoutDefaultConstructor.class).in(mContentResolver);
+  @Test
+  public void shouldCreateClassWithoutDefaultConstructor() throws Exception {
+    TestModels.ClassWithoutDefaultConstructor object = mTestSubject.iNeed(TestModels.ClassWithoutDefaultConstructor.class).in(mContentResolver);
+
+    assertThat(object).isNotNull();
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void shouldNotAllowCreatingClassWithoutPublicDefaultConstructor() throws Exception {
-    mTestSubject.iNeed(TestModels.ClassWithoutPublicDefaultConstructor.class).in(mContentResolver);
+  @Test
+  public void shouldCreateClassWithoutPublicDefaultConstructor() throws Exception {
+    TestModels.ClassWithoutPublicDefaultConstructor object = mTestSubject.iNeed(TestModels.ClassWithoutPublicDefaultConstructor.class).in(mContentResolver);
+
+    assertThat(object).isNotNull();
   }
 
   @Test
@@ -87,5 +92,14 @@ public class BasicFakingTest {
     assertThat(user).isNotNull();
 
     assertThat(user.updated_at).isEqualTo("now");
+  }
+
+  @Test
+  public void shouldCreateKotlinClassObject() throws Exception {
+    KotlinDataClass o = mTestSubject
+        .iNeed(KotlinDataClass.class)
+        .with("data", 21L)
+        .in(mContentResolver);
+    assertThat(o.getData()).isEqualTo(21L);
   }
 }
