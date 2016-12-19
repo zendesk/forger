@@ -94,7 +94,7 @@ Just add the dependency to your `build.gradle`:
 
 ```groovy
 dependencies {
-    testCompile 'com.getbase.android.forger:forger:0.1'
+    testCompile 'com.getbase.android.forger:forger:0.2'
 }
 ```
 
