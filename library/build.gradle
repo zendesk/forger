@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 21
@@ -29,6 +30,9 @@ dependencies {
   testCompile 'org.robolectric:robolectric:2.4'
   testCompile 'org.easytesting:fest-assert-core:2.0M10'
   testCompile 'org.mockito:mockito-all:1.9.5'
+
+  testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
   compile 'com.android.support:support-annotations:19.1.0'
 }
