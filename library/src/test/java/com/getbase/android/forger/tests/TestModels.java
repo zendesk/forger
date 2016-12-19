@@ -16,6 +16,7 @@
 
 package com.getbase.android.forger.tests;
 
+import com.getbase.android.forger.KotlinDataClass;
 import com.google.common.collect.ImmutableList;
 
 import org.chalup.microorm.annotations.Column;
@@ -286,6 +287,7 @@ public final class TestModels {
 
   static ModelGraph<TestModel> MODEL_GRAPH = ModelGraph.of(TestModel.class)
       .identifiedByDefault().by("id")
+      .with(new BaseTestModel(KotlinDataClass.class))
       .with(new BaseTestModel(ClassWithoutDefaultConstructor.class))
       .with(new BaseTestModel(ClassWithoutPublicDefaultConstructor.class))
       .with(new BaseTestModel(ClassWithNonBasicFieldType.class))

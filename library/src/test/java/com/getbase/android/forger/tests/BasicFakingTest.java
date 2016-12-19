@@ -19,6 +19,7 @@ package com.getbase.android.forger.tests;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import com.getbase.android.forger.Forger;
+import com.getbase.android.forger.KotlinDataClass;
 
 import org.chalup.microorm.MicroOrm;
 import org.junit.Before;
@@ -91,5 +92,14 @@ public class BasicFakingTest {
     assertThat(user).isNotNull();
 
     assertThat(user.updated_at).isEqualTo("now");
+  }
+
+  @Test
+  public void shouldCreateKotlinClassObject() throws Exception {
+    KotlinDataClass o = mTestSubject
+        .iNeed(KotlinDataClass.class)
+        .with("data", 21L)
+        .in(mContentResolver);
+    assertThat(o.getData()).isEqualTo(21L);
   }
 }
